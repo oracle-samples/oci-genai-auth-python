@@ -7,14 +7,14 @@ from unittest.mock import MagicMock, patch
 import httpx
 import pytest
 
-from oci_genai_support import (
+from oci_genai_auth import (
     OciInstancePrincipalAuth,
     OciOpenAI,
     OciResourcePrincipalAuth,
     OciSessionAuth,
     OciUserPrincipalAuth,
 )
-from oci_genai_support.openai.oci_openai import (
+from oci_genai_auth.openai.oci_openai import (
     _build_base_url,
     _build_headers,
     _build_service_endpoint,

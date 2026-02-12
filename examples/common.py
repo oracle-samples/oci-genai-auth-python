@@ -1,7 +1,7 @@
 # Copyright (c) 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
 
-from oci_genai_support import OciOpenAI, OciSessionAuth
+from oci_genai_auth import OciOpenAI, OciSessionAuth
 
 COMPARTMENT_ID = ""
 CONVERSATION_STORE_ID = ""

@@ -6,12 +6,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 from httpx import Request
 
-from oci_genai_support import OciInstancePrincipalAuth, OciResourcePrincipalAuth, OciSessionAuth
-from oci_genai_support.oci_openai import (
+from oci_genai_auth import OciInstancePrincipalAuth, OciResourcePrincipalAuth, OciSessionAuth
+from oci_genai_auth.oci_openai import (
     COMPARTMENT_ID_HEADER,
     CONVERSATION_STORE_ID_HEADER,
 )
-from oci_genai_support.openai.oci_openai import (
+from oci_genai_auth.openai.oci_openai import (
     _build_base_url,
     _build_service_endpoint,
 )

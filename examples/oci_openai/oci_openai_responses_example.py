@@ -2,7 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
 
 # mypy: ignore-errors
-from oci_genai_support import OciOpenAI, OciSessionAuth
+from oci_genai_auth import OciOpenAI, OciSessionAuth
 
 COMPARTMENT_ID = "ocid1.tenancy.oc1..dummy"
 CONVERSATION_STORE_ID = "ocid1.generativeaiconversationstore.oc1.us-chicago-1.dummy"

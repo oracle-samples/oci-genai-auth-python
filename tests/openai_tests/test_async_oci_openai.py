@@ -7,7 +7,7 @@ import json
 import pytest
 
 # oci openai sdk imports
-from oci_genai_support import AsyncOciOpenAI
+from oci_genai_auth import AsyncOciOpenAI
 from tests.openai_tests.common import auth_instance  # noqa: F401
 from tests.openai_tests.common import (
     COMPARTMENT_ID,

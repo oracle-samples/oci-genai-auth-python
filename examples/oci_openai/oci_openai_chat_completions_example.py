@@ -3,7 +3,7 @@
 
 import logging
 
-from oci_genai_support import OciOpenAI, OciSessionAuth
+from oci_genai_auth import OciOpenAI, OciSessionAuth
 
 logging.basicConfig(level=logging.DEBUG)
 

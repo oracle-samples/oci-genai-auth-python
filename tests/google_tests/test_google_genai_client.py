@@ -12,7 +12,7 @@ class DummyAuth(httpx.Auth):
 
 def test_builds_http_options(monkeypatch):
     genai = pytest.importorskip("google.genai")
-    from oci_genai_support.google import COMPARTMENT_ID_HEADER, OciGoogleGenAI
+    from oci_genai_auth.google import COMPARTMENT_ID_HEADER, OciGoogleGenAI
 
     captured = {}
     fake_models = SimpleNamespace(
@@ -47,7 +47,7 @@ def test_builds_http_options(monkeypatch):
 
 def test_generate_helpers(monkeypatch):
     genai = pytest.importorskip("google.genai")
-    from oci_genai_support.google import OciGoogleGenAI
+    from oci_genai_auth.google import OciGoogleGenAI
 
     fake_models = SimpleNamespace(
         generate_content=MagicMock(return_value="content"),
@@ -86,7 +86,7 @@ def test_generate_helpers(monkeypatch):
 
 def test_api_key_passthrough(monkeypatch):
     genai = pytest.importorskip("google.genai")
-    from oci_genai_support.google import OciGoogleGenAI
+    from oci_genai_auth.google import OciGoogleGenAI
 
     captured = {}
     fake_models = SimpleNamespace(

@@ -9,7 +9,7 @@ import asyncio
 from agents import Agent, Runner, set_default_openai_client, trace
 
 # OCI OpenAI Client SDK imports
-from oci_genai_support import AsyncOciOpenAI, OciSessionAuth
+from oci_genai_auth import AsyncOciOpenAI, OciSessionAuth
 
 # set_default_openai_key(openai_apikey)
 COMPARTMENT_ID = ""

@@ -6,7 +6,7 @@ import pytest
 from agents import Agent, Runner, set_default_openai_client
 
 # oci openai sdk imports
-from oci_genai_support import AsyncOciOpenAI
+from oci_genai_auth import AsyncOciOpenAI
 from tests.openai_agents_tests.common import auth_instance  # noqa: F401
 from tests.openai_agents_tests.common import (
     COMPARTMENT_ID,
@@ -36,7 +36,7 @@ async def test_agent_response(httpx_mock, oci_async_openai_client):
     # ---- Arrange ----
     _set_mock_create_response(httpx_mock=httpx_mock)
     # ---- Act ----
-    set_default_openai_client(oci_async_openai_client)
+    set_default_openai_client(oci_async_openai_client, use_for_tracing=False)
     agent = Agent(
         name="Assistant",
         instructions="You are a helpful assistant",

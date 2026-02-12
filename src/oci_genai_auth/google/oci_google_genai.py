@@ -106,10 +106,9 @@ def _merge_http_options(
     if auth is not None:
         client_args.setdefault("auth", auth)
         async_client_args.setdefault("auth", auth)
-    if client_args:
-        options["client_args"] = client_args
-    if async_client_args:
-        options["async_client_args"] = async_client_args
+    # Preserve empty dicts so callers can reliably inspect for "auth".
+    options["client_args"] = client_args
+    options["async_client_args"] = async_client_args
 
     return types.HttpOptions(**options)
 

@@ -1,5 +1,5 @@
-from oci_genai_support import OciSessionAuth
-from oci_genai_support.google import OciGoogleGenAI
+from oci_genai_auth import OciSessionAuth
+from oci_genai_auth.google import OciGoogleGenAI
 
 client = OciGoogleGenAI(
     auth=OciSessionAuth(profile_name="DEFAULT"),

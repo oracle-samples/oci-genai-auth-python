@@ -1,6 +1,6 @@
 import os
 
-from oci_genai_support.google import OciGoogleGenAI
+from oci_genai_auth.google import OciGoogleGenAI
 
 client = OciGoogleGenAI(
     auth=None,
