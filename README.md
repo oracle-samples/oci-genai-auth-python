@@ -1,15 +1,15 @@
-# oci-genai-support
+# oci-genai-auth
 
-[![PyPI - Version](https://img.shields.io/pypi/v/oci-genai-support.svg)](https://pypi.org/project/oci-genai-support)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oci-genai-support.svg)](https://pypi.org/project/oci-genai-support)
+[![PyPI - Version](https://img.shields.io/pypi/v/oci-genai-auth.svg)](https://pypi.org/project/oci-genai-auth)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oci-genai-auth.svg)](https://pypi.org/project/oci-genai-auth)
 
-The **OCI GenAI Support** Python library provides secure and convenient access to the OpenAI-compatible REST API hosted by **OCI Generative AI Service** and **OCI Data Science Model Deployment** Service.
+The **OCI GenAI Auth** Python library provides secure and convenient access to the OpenAI-compatible REST API hosted by **OCI Generative AI Service** and **OCI Data Science Model Deployment** Service.
 
 ---
 
 ## Table of Contents
 
-- [oci-genai-support](#oci-genai-support)
+- [oci-genai-auth](#oci-genai-auth)
   - [Table of Contents](#table-of-contents)
   - [Before You Start](#before-you-start)
   - [Installation](#installation)
@@ -22,6 +22,7 @@ The **OCI GenAI Support** Python library provides secure and convenient access t
     - [Google Gen AI (Gemini)](#google-gen-ai-gemini)
       - [Generate content](#generate-content)
       - [Generate images](#generate-images)
+    - [Anthropic](#anthropic)
     - [OCI Data Science Model Deployment](#oci-data-science-model-deployment)
       - [Using the OCI OpenAI Synchronous Client](#using-the-oci-openai-synchronous-client-1)
       - [Using the OCI OpenAI Asynchronous Client](#using-the-oci-openai-asynchronous-client-1)
@@ -37,7 +38,7 @@ The **OCI GenAI Support** Python library provides secure and convenient access t
 
 **Important!**
 
-Note that the OpenAI-compatible path in this package, as well as the API keys package described below, only supports OpenAI, xAi Grok and Meta LLama models on OCI Generative AI. The Google Gen AI integration is separate and uses the Google SDK with a custom base URL.
+Note that the OpenAI-compatible path in this package, as well as the API keys package described below, only supports OpenAI, xAi Grok and Meta LLama models on OCI Generative AI. The Google Gen AI and Anthropic integrations are separate and use their respective SDKs with custom base URLs.
 
 Before you start using this package, determine if this is the right option for you.
 
@@ -106,14 +107,15 @@ It offers the same compatibility with the `openai` SDK, but requires patching th
 ## Installation
 
 ```console
-pip install "oci-genai-support[openai]"
+pip install "oci-genai-auth[openai]"
 ```
 
-The OpenAI integration continues to use the `oci_genai_support` import path. The Google Gen AI integration uses `oci_genai_support.google`.
+The OpenAI integration continues to use the `oci_genai_auth` import path. The Google Gen AI integration uses `oci_genai_auth.google`. The Anthropic integration uses `oci_genai_auth.anthropic`.
 
 ```console
-pip install "oci-genai-support[google]"
-pip install "oci-genai-support[gemini]"
+pip install "oci-genai-auth[google]"
+pip install "oci-genai-auth[gemini]"
+pip install "oci-genai-auth[anthropic]"
 ```
 
 ---
@@ -129,7 +131,7 @@ Notes:
 #### Using the OCI OpenAI Synchronous Client
 
 ```python
-from oci_genai_support import OciOpenAI, OciSessionAuth
+from oci_genai_auth import OciOpenAI, OciSessionAuth
 
 client = OciOpenAI(
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
@@ -152,7 +154,7 @@ print(completion.model_dump_json())
 #### Using the OCI OpenAI Asynchronous Client
 
 ```python
-from oci_genai_support import AsyncOciOpenAI, OciSessionAuth
+from oci_genai_auth import AsyncOciOpenAI, OciSessionAuth
 
 client = AsyncOciOpenAI(
     auth=OciSessionAuth(profile_name="<profile name>"),
@@ -178,7 +180,7 @@ print(completion.model_dump_json())
 
 import httpx
 from openai import OpenAI
-from oci_genai_support import OciUserPrincipalAuth
+from oci_genai_auth import OciUserPrincipalAuth
 
 # Example for OCI Generative AI endpoint
 client = OpenAI(
@@ -208,7 +210,7 @@ print(completion.model_dump_json())
 ```python
 from langchain_openai import ChatOpenAI
 import httpx
-from oci_genai_support import OciUserPrincipalAuth
+from oci_genai_auth import OciUserPrincipalAuth
 
 
 llm = ChatOpenAI(
@@ -247,7 +249,7 @@ print(ai_msg)
 #### Using the OCI OpenAI Synchronous Client
 
 ```python
-from oci_genai_support import OciOpenAI, OciSessionAuth
+from oci_genai_auth import OciOpenAI, OciSessionAuth
 
 client = OciOpenAI(
     base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
@@ -270,7 +272,7 @@ print(response.model_dump_json())
 #### Using the OCI OpenAI Asynchronous Client
 
 ```python
-from oci_genai_support import AsyncOciOpenAI, OciSessionAuth
+from oci_genai_auth import AsyncOciOpenAI, OciSessionAuth
 
 # Example for OCI Data Science Model Deployment endpoint
 client = AsyncOciOpenAI(
@@ -297,7 +299,7 @@ print(response.model_dump_json())
 
 import httpx
 from openai import OpenAI
-from oci_genai_support import OciSessionAuth
+from oci_genai_auth import OciSessionAuth
 
 # Example for OCI Data Science Model Deployment endpoint
 client = OpenAI(
@@ -332,7 +334,7 @@ Supported signers
 Minimal examples of constructing each auth type:
 
 ```python
-from oci_genai_support import (
+from oci_genai_auth import (
     OciOpenAI,
     OciSessionAuth,
     OciResourcePrincipalAuth,
@@ -364,8 +366,8 @@ request signing and OCI headers so you can call Google-style APIs against OCI-ho
 #### Generate content
 
 ```python
-from oci_genai_support import OciSessionAuth
-from oci_genai_support.google import OciGoogleGenAI
+from oci_genai_auth import OciSessionAuth
+from oci_genai_auth.google import OciGoogleGenAI
 
 client = OciGoogleGenAI(
     auth=OciSessionAuth(profile_name="<profile name>"),
@@ -383,8 +385,8 @@ print(response)
 #### Generate images
 
 ```python
-from oci_genai_support import OciSessionAuth
-from oci_genai_support.google import OciGoogleGenAI
+from oci_genai_auth import OciSessionAuth
+from oci_genai_auth.google import OciGoogleGenAI
 
 client = OciGoogleGenAI(
     auth=OciSessionAuth(profile_name="<profile name>"),
@@ -404,7 +406,7 @@ print(response)
 ```python
 import os
 
-from oci_genai_support.google import OciGoogleGenAI
+from oci_genai_auth.google import OciGoogleGenAI
 
 client = OciGoogleGenAI(
     auth=None,
@@ -418,6 +420,26 @@ response = client.generate_content(
     contents="Summarize the benefits of using OCI with Gemini models.",
 )
 print(response)
+```
+
+### Anthropic
+
+```python
+from oci_genai_auth import OciSessionAuth
+from oci_genai_auth.anthropic import OciAnthropic
+
+client = OciAnthropic(
+    auth=OciSessionAuth(profile_name="<profile name>"),
+    base_url="https://<your-oci-endpoint>",
+    compartment_id="<compartment ocid>",
+)
+
+message = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=256,
+    messages=[{"role": "user", "content": "Write a one-sentence bedtime story about a unicorn."}],
+)
+print(message)
 ```
 
 ## Contributing
@@ -435,7 +457,7 @@ Please consult the [security guide](./SECURITY.md) for our responsible security 
 
 ## License
 
-Copyright (c) 2025 Oracle and/or its affiliates.
+Copyright (c) 2026 Oracle and/or its affiliates.
 
 Released under the Universal Permissive License v1.0 as shown at
 [https://oss.oracle.com/licenses/upl/](https://oss.oracle.com/licenses/upl/)

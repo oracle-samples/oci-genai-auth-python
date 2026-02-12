@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "oci-genai-support"
+name = "oci-genai-auth"
 dynamic = ["version"]
 description = 'OCI authentication and authorization utilities for Generative AI SDKs'
 readme = "README.md"
@@ -47,7 +47,9 @@ google = [
 gemini = [
       "google-genai>=1.0.0",
 ]
-anthropic = []
+anthropic = [
+      "anthropic>=0.79.0",
+]
 dev = [
       "ruff>=0.5.6,<0.6.0",
       "mypy>=1.11.1,<2.0.0",
@@ -59,6 +61,7 @@ dev = [
       "typing-extensions>=4.11, <5",
       "openai>=v1.108.1",
       "google-genai>=1.0.0",
+      "anthropic>=0.79.0",
       "openai-agents>=0.5.1",
       "pytest-mock",
       "ag2[openai]",
@@ -69,31 +72,31 @@ dev = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/oracle-samples/oci-openai#readme"
-Issues = "https://github.com/oracle-samples/oci-openai/issues"
-Source = "https://github.com/oracle-samples/oci-openai"
+Documentation = "https://github.com/oracle-samples/oci-genai-auth#readme"
+Issues = "https://github.com/oracle-samples/oci-genai-auth/issues"
+Source = "https://github.com/oracle-samples/oci-genai-auth"
 
 [tool.hatch.version]
-path = "src/oci_genai_support/__about__.py"
+path = "src/oci_genai_auth/__about__.py"
 
 [tool.hatch.envs.types]
 extra-dependencies = [
     "mypy>=1.0.0",
 ]
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/oci_genai_support tests}"
+check = "mypy --install-types --non-interactive {args:src/oci_genai_auth tests}"
 
 [tool.coverage.run]
-source_pkgs = ["oci_genai_support", "tests"]
+source_pkgs = ["oci_genai_auth", "tests"]
 branch = true
 parallel = true
 omit = [
-    "src/oci_genai_support/__about__.py",
+    "src/oci_genai_auth/__about__.py",
 ]
 
 [tool.coverage.paths]
-oci_genai_support = ["src/oci_genai_support", "*/oci-genai-support/src/oci_genai_support"]
-tests = ["tests", "*/oci-genai-support/tests"]
+oci_genai_auth = ["src/oci_genai_auth", "*/oci-genai-auth/src/oci_genai_auth"]
+tests = ["tests", "*/oci-genai-auth/tests"]
 
 [tool.coverage.report]
 exclude_lines = [
