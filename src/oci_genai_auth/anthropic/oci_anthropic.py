@@ -63,7 +63,6 @@ class OciAnthropic(Anthropic):
 
         request_headers = _build_headers(compartment_id)
         custom_headers = _merge_headers(default_headers, request_headers)
-        custom_headers = _ensure_auth_headers_omitted(custom_headers)
 
         client = http_client or DefaultHttpxClient(
             auth=auth,
@@ -81,6 +80,19 @@ class OciAnthropic(Anthropic):
             http_client=client,
             **kwargs,
         )
+
+    @property
+    def auth_headers(self) -> dict[str, str]:
+        # OCI request signing is handled by httpx.Auth; skip SDK auth headers.
+        return {}
+
+    def _prepare_options(  # type: ignore[override]
+        self,
+        options,
+    ):
+        options = super()._prepare_options(options)
+        options.headers = _omit_auth_headers(options.headers)
+        return options
 
 
 class AsyncOciAnthropic(AsyncAnthropic):
@@ -114,7 +126,6 @@ class AsyncOciAnthropic(AsyncAnthropic):
 
         request_headers = _build_headers(compartment_id)
         custom_headers = _merge_headers(default_headers, request_headers)
-        custom_headers = _ensure_auth_headers_omitted(custom_headers)
 
         client = http_client or DefaultAsyncHttpxClient(
             auth=auth,
@@ -132,6 +143,19 @@ class AsyncOciAnthropic(AsyncAnthropic):
             http_client=client,
             **kwargs,
         )
+
+    @property
+    def auth_headers(self) -> dict[str, str]:
+        # OCI request signing is handled by httpx.Auth; skip SDK auth headers.
+        return {}
+
+    async def _prepare_options(  # type: ignore[override]
+        self,
+        options,
+    ):
+        options = await super()._prepare_options(options)
+        options.headers = _omit_auth_headers(options.headers)
+        return options
 
 
 def _build_headers(compartment_id: str | None) -> dict[str, str]:
@@ -155,12 +179,17 @@ def _merge_headers(
     return merged
 
 
-def _ensure_auth_headers_omitted(headers: Mapping[str, str | Omit]) -> dict[str, str | Omit]:
-    if "X-Api-Key" in headers or "Authorization" in headers:
-        return dict(headers)
+def _omit_auth_headers(headers: Mapping[str, str | Omit] | NotGiven) -> dict[str, str | Omit]:
+    if isinstance(headers, NotGiven):
+        updated: dict[str, str | Omit] = {}
+    else:
+        updated = dict(headers)
 
-    updated = dict(headers)
+    if "X-Api-Key" in updated or "Authorization" in updated:
+        return updated
+
     updated["X-Api-Key"] = omit
+    updated["Authorization"] = omit
     return updated
 
 

@@ -1,3 +1,5 @@
+from anthropic import Anthropic
+
 from oci_genai_auth import OciSessionAuth
 from oci_genai_auth.anthropic import OciAnthropic
 

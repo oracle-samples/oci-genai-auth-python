@@ -10,6 +10,7 @@ class DummyAuth(httpx.Auth):
 def test_builds_http_client_and_headers():
     pytest.importorskip("anthropic")
     from anthropic import Omit
+    from anthropic._base_client import FinalRequestOptions
     from oci_genai_auth.anthropic import (
         COMPARTMENT_ID_HEADER,
         OPC_COMPARTMENT_ID_HEADER,
@@ -28,7 +29,12 @@ def test_builds_http_client_and_headers():
     assert client._client.headers[COMPARTMENT_ID_HEADER] == "ocid1.compartment.oc1..dummy"
     assert client._client.headers[OPC_COMPARTMENT_ID_HEADER] == "ocid1.compartment.oc1..dummy"
     assert client.default_headers["X-Test"] == "1"
-    assert isinstance(client.default_headers.get("X-Api-Key"), Omit)
+    assert "X-Api-Key" not in client.default_headers
+    assert "Authorization" not in client.default_headers
+
+    options = FinalRequestOptions.construct(method="get", url="/v1/test")
+    prepared = client._prepare_options(options)
+    assert isinstance(prepared.headers.get("X-Api-Key"), Omit)
 
 
 def test_async_client_builds_http_client():
