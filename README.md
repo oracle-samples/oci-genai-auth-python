@@ -15,17 +15,16 @@ The **OCI GenAI Auth** Python library provides secure and convenient access to t
   - [Installation](#installation)
   - [Examples](#examples)
     - [OCI Generative AI](#oci-generative-ai)
-      - [Using the OCI OpenAI Synchronous Client](#using-the-oci-openai-synchronous-client)
-      - [Using the OCI OpenAI Asynchronous Client](#using-the-oci-openai-asynchronous-client)
       - [Using the Native OpenAI Client](#using-the-native-openai-client)
       - [Using with Langchain](#using-with-langchain-openai)
     - [Google Gen AI (Gemini)](#google-gen-ai-gemini)
-      - [Generate content](#generate-content)
-      - [Generate images](#generate-images)
+      - [Using the Native Google Gen AI Client](#using-the-native-google-gen-ai-client)
+      - [Generate Images](#generate-images)
+      - [Async Generate Content](#async-generate-content)
     - [Anthropic](#anthropic)
+      - [Using the Native Anthropic Client](#using-the-native-anthropic-client)
+      - [Async Messages](#async-messages)
     - [OCI Data Science Model Deployment](#oci-data-science-model-deployment)
-      - [Using the OCI OpenAI Synchronous Client](#using-the-oci-openai-synchronous-client-1)
-      - [Using the OCI OpenAI Asynchronous Client](#using-the-oci-openai-asynchronous-client-1)
       - [Using the Native OpenAI Client](#using-the-native-openai-client-1)
     - [Signers](#signers)
   - [Contributing](#contributing)
@@ -38,7 +37,7 @@ The **OCI GenAI Auth** Python library provides secure and convenient access to t
 
 **Important!**
 
-Note that the OpenAI-compatible path in this package, as well as the API keys package described below, only supports OpenAI, xAi Grok and Meta LLama models on OCI Generative AI. The Google Gen AI and Anthropic integrations are separate and use their respective SDKs with custom base URLs.
+This package provides OCI request-signing helpers for `httpx`. It does not ship OCI-specific SDK clients. Use the native OpenAI SDK with a custom `httpx` client that applies OCI signing.
 
 Before you start using this package, determine if this is the right option for you.
 
@@ -71,7 +70,7 @@ print(API_KEY)
 
 client = OpenAI(
     api_key=API_KEY,
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1"
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
 )
 
 # Responses API
@@ -107,15 +106,15 @@ It offers the same compatibility with the `openai` SDK, but requires patching th
 ## Installation
 
 ```console
-pip install "oci-genai-auth[openai]"
+pip install oci-genai-auth
 ```
 
-The OpenAI integration continues to use the `oci_genai_auth` import path. The Google Gen AI integration uses `oci_genai_auth.google`. The Anthropic integration uses `oci_genai_auth.anthropic`.
+Install the SDKs you plan to use separately, for example:
 
 ```console
-pip install "oci-genai-auth[google]"
-pip install "oci-genai-auth[gemini]"
-pip install "oci-genai-auth[anthropic]"
+pip install openai
+pip install anthropic
+pip install google-genai
 ```
 
 ---
@@ -127,52 +126,7 @@ pip install "oci-genai-auth[anthropic]"
 Notes:
 
 - **Cohere models do not support OpenAI-compatible API**
-
-#### Using the OCI OpenAI Synchronous Client
-
-```python
-from oci_genai_auth import OciOpenAI, OciSessionAuth
-
-client = OciOpenAI(
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
-    auth=OciSessionAuth(profile_name="<profile name>"),
-    compartment_id="<compartment ocid>",
-)
-
-completion = client.chat.completions.create(
-    model="<model name>",
-    messages=[
-        {
-            "role": "user",
-            "content": "How do I output all files in a directory using Python?",
-        },
-    ],
-)
-print(completion.model_dump_json())
-```
-
-#### Using the OCI OpenAI Asynchronous Client
-
-```python
-from oci_genai_auth import AsyncOciOpenAI, OciSessionAuth
-
-client = AsyncOciOpenAI(
-    auth=OciSessionAuth(profile_name="<profile name>"),
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
-    compartment_id="<compartment ocid>",
-)
-
-completion = await client.chat.completions.create(
-    model="<model name>",
-    messages=[
-        {
-            "role": "user",
-            "content": "How do I output all files in a directory using Python?",
-        },
-    ],
-)
-print(completion.model_dump_json())
-```
+- **OCI Generative AI requires the OpenAI SDK base URL to end with `/openai/v1`**
 
 #### Using the Native OpenAI Client
 
@@ -180,15 +134,18 @@ print(completion.model_dump_json())
 
 import httpx
 from openai import OpenAI
-from oci_genai_auth import OciUserPrincipalAuth
+from oci_genai_auth import OciSessionAuth
 
 # Example for OCI Generative AI endpoint
 client = OpenAI(
-    api_key="OCI",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+    api_key="not-used",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     http_client=httpx.Client(
         auth=OciSessionAuth(profile_name="<profile name>"),
-        headers={"CompartmentId": "<compartment ocid>"}
+        headers={
+            "CompartmentId": "<compartment ocid>",
+            "opc-compartment-id": "<compartment ocid>",
+        },
     ),
 )
 
@@ -205,6 +162,9 @@ print(completion.model_dump_json())
 
 ```
 
+If you only need the auth helpers (no OCI-specific OpenAI shim client), you can import them from
+`oci_genai_auth` which only exposes the signer classes used by `httpx`.
+
 #### Using with langchain-openai
 
 ```python
@@ -215,11 +175,14 @@ from oci_genai_auth import OciUserPrincipalAuth
 
 llm = ChatOpenAI(
     model="<model name>",  # for example "xai.grok-4-fast-reasoning"
-    api_key="OCI",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+    api_key="not-used",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     http_client=httpx.Client(
         auth=OciUserPrincipalAuth(profile_name="<profile name>"),
-        headers={"CompartmentId": "<compartment ocid>"}
+        headers={
+            "CompartmentId": "<compartment ocid>",
+            "opc-compartment-id": "<compartment ocid>",
+        },
     ),
     # use_responses_api=True
     # stream_usage=True,
@@ -244,54 +207,167 @@ print(ai_msg)
 
 ---
 
+### Google Gen AI (Gemini)
+
+#### Using the Native Google Gen AI Client
+
+```python
+import httpx
+from google import genai
+from oci_genai_auth import OciSessionAuth
+
+client = genai.Client(
+    api_key="not-used",
+    http_options={
+        "base_url": "https://<your-oci-endpoint>",
+        "httpx_client": httpx.Client(
+            auth=OciSessionAuth(profile_name="<profile name>"),
+            headers={
+                "CompartmentId": "<compartment ocid>",
+                "opc-compartment-id": "<compartment ocid>",
+            },
+        ),
+    },
+)
+
+response = client.models.generate_content(
+    model="gemini-2.0-flash-001",
+    contents="Write a one-sentence bedtime story about a unicorn.",
+)
+print(response)
+```
+
+#### Generate Images
+
+```python
+import httpx
+from google import genai
+from oci_genai_auth import OciSessionAuth
+
+client = genai.Client(
+    api_key="not-used",
+    http_options={
+        "base_url": "https://<your-oci-endpoint>",
+        "httpx_client": httpx.Client(
+            auth=OciSessionAuth(profile_name="<profile name>"),
+            headers={
+                "CompartmentId": "<compartment ocid>",
+                "opc-compartment-id": "<compartment ocid>",
+            },
+        ),
+    },
+)
+
+response = client.models.generate_images(
+    model="imagen-3.0-generate-002",
+    prompt="A poster of a mythical dragon in a neon city.",
+)
+print(response)
+```
+
+#### Async Generate Content
+
+```python
+import asyncio
+
+import httpx
+from google import genai
+from oci_genai_auth import OciSessionAuth
+
+async def main() -> None:
+    http_client = httpx.AsyncClient(
+        auth=OciSessionAuth(profile_name="<profile name>"),
+        headers={
+            "CompartmentId": "<compartment ocid>",
+            "opc-compartment-id": "<compartment ocid>",
+        },
+    )
+
+    client = genai.Client(
+        api_key="not-used",
+        http_options={
+            "base_url": "https://<your-oci-endpoint>",
+            "httpx_async_client": http_client,
+        },
+    )
+
+    response = await client.aio.models.generate_content(
+        model="gemini-2.0-flash-001",
+        contents="Write a one-sentence bedtime story about a unicorn.",
+    )
+    print(response)
+    await http_client.aclose()
+
+asyncio.run(main())
+```
+
+---
+
+### Anthropic
+
+#### Using the Native Anthropic Client
+
+```python
+import httpx
+from anthropic import Anthropic
+from oci_genai_auth import OciSessionAuth
+
+client = Anthropic(
+    api_key="not-used",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/anthropic",
+    http_client=httpx.Client(
+        auth=OciSessionAuth(profile_name="<profile name>"),
+        headers={
+            "CompartmentId": "<compartment ocid>",
+            "opc-compartment-id": "<compartment ocid>",
+        },
+    ),
+)
+
+message = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=256,
+    messages=[{"role": "user", "content": "Write a one-sentence bedtime story about a unicorn."}],
+)
+print(message)
+```
+
+#### Async Messages
+
+```python
+import asyncio
+
+import httpx
+from anthropic import AsyncAnthropic
+from oci_genai_auth import OciSessionAuth
+
+async def main() -> None:
+    client = AsyncAnthropic(
+        api_key="not-used",
+        base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/anthropic",
+        http_client=httpx.AsyncClient(
+            auth=OciSessionAuth(profile_name="<profile name>"),
+            headers={
+                "CompartmentId": "<compartment ocid>",
+                "opc-compartment-id": "<compartment ocid>",
+            },
+        ),
+    )
+
+    message = await client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=256,
+        messages=[{"role": "user", "content": "Write a one-sentence bedtime story about a unicorn."}],
+    )
+    print(message)
+    await client.close()
+
+asyncio.run(main())
+```
+
+---
+
 ### OCI Data Science Model Deployment
-
-#### Using the OCI OpenAI Synchronous Client
-
-```python
-from oci_genai_auth import OciOpenAI, OciSessionAuth
-
-client = OciOpenAI(
-    base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
-    auth=OciSessionAuth(profile_name="<profile name>")
-)
-
-response = client.chat.completions.create(
-    model="<model-name>",
-    messages=[
-        {
-            "role": "user",
-            "content": "Explain how to list all files in a directory using Python.",
-        },
-    ],
-)
-
-print(response.model_dump_json())
-```
-
-#### Using the OCI OpenAI Asynchronous Client
-
-```python
-from oci_genai_auth import AsyncOciOpenAI, OciSessionAuth
-
-# Example for OCI Data Science Model Deployment endpoint
-client = AsyncOciOpenAI(
-    base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
-    auth=OciSessionAuth(profile_name="<profile name>")
-)
-
-response = await client.chat.completions.create(
-    model="<model-name>",
-    messages=[
-        {
-            "role": "user",
-            "content": "Explain how to list all files in a directory using Python.",
-        },
-    ],
-)
-
-print(response.model_dump_json())
-```
 
 #### Using the Native OpenAI Client
 
@@ -303,7 +379,7 @@ from oci_genai_auth import OciSessionAuth
 
 # Example for OCI Data Science Model Deployment endpoint
 client = OpenAI(
-    api_key="OCI",
+    api_key="not-used",
     base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
     http_client=httpx.Client(auth=OciSessionAuth()),
 )
@@ -335,7 +411,6 @@ Minimal examples of constructing each auth type:
 
 ```python
 from oci_genai_auth import (
-    OciOpenAI,
     OciSessionAuth,
     OciResourcePrincipalAuth,
     OciInstancePrincipalAuth,
@@ -356,91 +431,6 @@ up_auth = OciUserPrincipalAuth(profile_name="DEFAULT")
 ```
 
 ---
-
-### Google Gen AI (Gemini)
-
-The Google Gen AI SDK supports a custom base URL (via `http_options` with `vertexai=True`)
-and model APIs like `generate_content` and `generate_images`. This wrapper wires in OCI
-request signing and OCI headers so you can call Google-style APIs against OCI-hosted endpoints.
-
-#### Generate content
-
-```python
-from oci_genai_auth import OciSessionAuth
-from oci_genai_auth.google import OciGoogleGenAI
-
-client = OciGoogleGenAI(
-    auth=OciSessionAuth(profile_name="<profile name>"),
-    base_url="https://<your-oci-endpoint>",
-    compartment_id="<compartment ocid>",
-)
-
-response = client.generate_content(
-    model="gemini-2.0-flash-001",
-    contents="Write a one-sentence bedtime story about a unicorn.",
-)
-print(response)
-```
-
-#### Generate images
-
-```python
-from oci_genai_auth import OciSessionAuth
-from oci_genai_auth.google import OciGoogleGenAI
-
-client = OciGoogleGenAI(
-    auth=OciSessionAuth(profile_name="<profile name>"),
-    base_url="https://<your-oci-endpoint>",
-    compartment_id="<compartment ocid>",
-)
-
-response = client.generate_images(
-    model="imagen-3.0-generate-002",
-    prompt="A poster of a mythical dragon in a neon city.",
-)
-print(response)
-```
-
-#### Gemini API key
-
-```python
-import os
-
-from oci_genai_auth.google import OciGoogleGenAI
-
-client = OciGoogleGenAI(
-    auth=None,
-    base_url="https://<google-genai-base-url>",
-    vertexai=False,
-    api_key=os.getenv("GEMINI_API_KEY"),
-)
-
-response = client.generate_content(
-    model="gemini-2.0-flash-001",
-    contents="Summarize the benefits of using OCI with Gemini models.",
-)
-print(response)
-```
-
-### Anthropic
-
-```python
-from oci_genai_auth import OciSessionAuth
-from oci_genai_auth.anthropic import OciAnthropic
-
-client = OciAnthropic(
-    auth=OciSessionAuth(profile_name="<profile name>"),
-    base_url="https://<your-oci-endpoint>",
-    compartment_id="<compartment ocid>",
-)
-
-message = client.messages.create(
-    model="claude-3-5-sonnet-20241022",
-    max_tokens=256,
-    messages=[{"role": "user", "content": "Write a one-sentence bedtime story about a unicorn."}],
-)
-print(message)
-```
 
 ## Contributing
 

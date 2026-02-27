@@ -3,19 +3,26 @@
 
 from __future__ import annotations
 
-from examples.anthropic.common import build_client, get_model
+from examples import common
+
+MODEL = "claude-opus-4-6"
+
+
+def _build_client():
+    return common.build_anthropic_client()
 
 
 def main() -> None:
-    client = build_client()
+    client = _build_client()
 
     message = client.beta.messages.create(
-        model=get_model("claude-opus-4-6"),
+        model=MODEL,
         max_tokens=512,
         messages=[
             {
                 "role": "user",
-                "content": "Summarize the key points from https://www.anthropic.com in 2-3 sentences.",
+                "content": "Summarize the key points from https://www.anthropic.com"
+                " in 2-3 sentences.",
             }
         ],
         tools=[

@@ -5,9 +5,15 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-from examples.anthropic.common import build_client, get_model
+from examples import common
 
 MEMORY_ROOT = "/memories"
+
+MODEL = "claude-opus-4-6"
+
+
+def _build_client():
+    return common.build_anthropic_client()
 
 
 def _normalize_path(path: str) -> str | None:
@@ -116,7 +122,7 @@ def _handle_memory_command(memory_files: Dict[str, str], tool_input: dict) -> st
 
 
 def main() -> None:
-    client = build_client()
+    client = _build_client()
     memory_files: Dict[str, str] = {}
 
     messages = [
@@ -128,7 +134,7 @@ def main() -> None:
 
     while True:
         response = client.beta.messages.create(
-            model=get_model("claude-opus-4-6"),
+            model=MODEL,
             max_tokens=256,
             betas=["context-management-2025-06-27"],
             tools=[
@@ -140,7 +146,7 @@ def main() -> None:
             messages=messages,
         )
 
-        print(response)
+        print(response.model_dump_json(indent=2))
 
         if response.stop_reason != "tool_use":
             break

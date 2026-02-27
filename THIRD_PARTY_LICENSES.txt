@@ -20,29 +20,12 @@ oci
 * Source code: https://github.com/oracle/oci-python-sdk
 * Project home: https://docs.oracle.com/en-us/iaas/tools/python/2.44.0/index.html
 
-openai
-* Copyright 2026 OpenAI
-* License: Apache License 2.0
-* Source code: https://github.com/openai/openai-python
-* Project home: https://platform.openai.com/docs/api-reference/introduction?lang=python
-
 requests
 * Copyright 2023 Kenneth Reitz
 * License: Apache-2.0 license
 * Source code: https://github.com/psf/requests
 * Project home: https://requests.readthedocs.io/en/latest/
 
-anthropic
-* Copyright 2023 Anthropic, PBC.
-* License: MIT License
-* Source code: https://github.com/anthropics/anthropic-sdk-python
-* Project home: https://platform.claude.com/docs/en/api/sdks/python
-
-google-genai
-* Copyright 2025 Google LLC
-* License: Apache-2.0 license
-* Source code: https://github.com/googleapis/python-genai/tree/main/google/genai
-* Project home: https://ai.google.dev/gemini-api/docs/libraries
 =============================== Licenses ===============================
 
 ------------------------------ MIT License -----------------------------

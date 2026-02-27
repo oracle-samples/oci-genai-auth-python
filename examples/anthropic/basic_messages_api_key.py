@@ -1,13 +1,17 @@
 # Copyright (c) 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
 
-from examples import common
+
+from anthropic import Anthropic
 
 MODEL = "claude-opus-4-6"
 
 
 def main() -> None:
-    client = common.build_anthropic_client()
+    client = Anthropic(
+        api_key="<<API_KEY_HERE>>",
+        base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/anthropic",
+    )
 
     message = client.messages.create(
         model=MODEL,

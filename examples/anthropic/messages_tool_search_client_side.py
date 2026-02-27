@@ -3,7 +3,13 @@
 
 from __future__ import annotations
 
-from examples.anthropic.common import build_client, get_model
+from examples import common
+
+MODEL = "claude-opus-4-6"
+
+
+def _build_client():
+    return common.build_anthropic_client()
 
 
 def _handle_tool_use(block):
@@ -40,7 +46,7 @@ def _handle_tool_use(block):
 
 
 def main() -> None:
-    client = build_client()
+    client = _build_client()
 
     tools = [
         {
@@ -73,7 +79,7 @@ def main() -> None:
 
     while True:
         response = client.messages.create(
-            model=get_model("claude-opus-4-6"),
+            model=MODEL,
             max_tokens=256,
             system="Use client_tool_search to discover tools before calling them.",
             messages=messages,
@@ -81,7 +87,7 @@ def main() -> None:
             tool_choice={"type": "auto"},
         )
 
-        print(response)
+        print(response.model_dump_json(indent=2))
 
         if response.stop_reason != "tool_use":
             break

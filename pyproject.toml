@@ -38,18 +38,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-openai = [
-      "openai>=v1.93.1",
-]
-google = [
-      "google-genai>=1.61.0",
-]
-gemini = [
-      "google-genai>=1.61.0",
-]
-anthropic = [
-      "anthropic>=0.67.0",
-]
 dev = [
       "ruff>=0.5.6,<0.6.0",
       "mypy>=1.11.1,<2.0.0",

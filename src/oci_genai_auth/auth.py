@@ -91,6 +91,17 @@ class HttpxOciAuth(httpx.Auth, ABC):
         Sign the given HTTPX request with the OCI signer using the provided content.
         Updates request.headers in place with the signed headers.
         """
+        # Strip any SDK auth headers to avoid conflicting with OCI signing.
+        request.headers.pop("Authorization", None)
+        request.headers.pop("X-Api-Key", None)
+        request.headers.pop("x-goog-api-key", None)
+
+        # Remove Google API key query parameter if present.
+        params = list(request.url.params.multi_items())
+        if params:
+            filtered = [(key, value) for key, value in params if key.lower() != "key"]
+            if len(filtered) != len(params):
+                request.url = request.url.copy_with(params=filtered)
         req = requests.Request(
             method=request.method,
             url=str(request.url),
