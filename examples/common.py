@@ -18,44 +18,33 @@ if TYPE_CHECKING:
 COMPARTMENT_ID = ""
 CONVERSATION_STORE_ID = ""
 OPENAI_PROJECT = ""
-OVERRIDE_URL = ""
 PROFILE_NAME = "DEFAULT"
-REGION = "us-chicago-1"
 GEMINI_API_KEY = ""
-GEMINI_BASE_URL = ""
+
+# OpenAI-compatible base URLs.
+OPENAI_BASE_URL_PT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/v1"
+OPENAI_BASE_URL_NP = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
+# Switch to "NP" for examples that store data on the server.
+RESPONSE_API_MODE = "PT"  # "PT" (pass-through) or "NP" (non-pass-through)
+
+# Other provider base URLs.
+ANTHROPIC_BASE_URL = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/anthropic"
+GOOGLE_BASE_URL = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/google"
 
 
 def _build_headers(include_conversation_store_id: bool = False) -> dict[str, str]:
-    headers: dict[str, str] = {}
-    if COMPARTMENT_ID:
-        headers["CompartmentId"] = COMPARTMENT_ID
-        headers["opc-compartment-id"] = COMPARTMENT_ID
-    if OPENAI_PROJECT:
-        headers["OpenAI-Project"] = OPENAI_PROJECT
-    if include_conversation_store_id and CONVERSATION_STORE_ID:
+    headers: dict[str, str] = {
+        "CompartmentId": COMPARTMENT_ID,
+        "opc-compartment-id": COMPARTMENT_ID,
+        "OpenAI-Project": OPENAI_PROJECT,
+    }
+    if include_conversation_store_id:
         headers["opc-conversation-store-id"] = CONVERSATION_STORE_ID
-    return headers
+    return {key: value for key, value in headers.items() if value}
 
 
 def _resolve_openai_base_url() -> str:
-    service_endpoint = OVERRIDE_URL or (
-        f"https://inference.generativeai.{REGION}.oci.oraclecloud.com" if REGION else ""
-    )
-    if not service_endpoint:
-        raise ValueError("REGION or OVERRIDE_URL must be set.")
-    return f"{service_endpoint.rstrip(' /')}/openai/v1"
-
-
-def _resolve_anthropic_base_url() -> str:
-    if not REGION:
-        raise ValueError("REGION or ANTHROPIC_BASE_URL must be set.")
-    return f"https://inference.generativeai.{REGION}.oci.oraclecloud.com/anthropic"
-
-
-def _resolve_google_base_url() -> str:
-    if not REGION:
-        raise ValueError("REGION or GOOGLE_BASE_URL must be set.")
-    return f"https://inference.generativeai.{REGION}.oci.oraclecloud.com/google"
+    return OPENAI_BASE_URL_NP if RESPONSE_API_MODE == "NP" else OPENAI_BASE_URL_PT
 
 
 def build_openai_client() -> "OpenAI":
@@ -95,7 +84,7 @@ def build_anthropic_client() -> "Anthropic":
 
     return Anthropic(
         api_key="not-used",
-        base_url=_resolve_anthropic_base_url(),
+        base_url=ANTHROPIC_BASE_URL,
         http_client=httpx.Client(
             auth=OciSessionAuth(profile_name=PROFILE_NAME),
             headers=_build_headers(),
@@ -108,7 +97,7 @@ def build_anthropic_async_client() -> "AsyncAnthropic":
 
     return AsyncAnthropic(
         api_key="not-used",
-        base_url=_resolve_anthropic_base_url(),
+        base_url=ANTHROPIC_BASE_URL,
         http_client=httpx.AsyncClient(
             auth=OciSessionAuth(profile_name=PROFILE_NAME),
             headers=_build_headers(),
@@ -127,7 +116,7 @@ def build_google_client() -> "genai.Client":
     return genai.Client(
         api_key="not-used",
         http_options={
-            "base_url": _resolve_google_base_url(),
+            "base_url": GOOGLE_BASE_URL,
             "headers": headers,
             "httpx_client": http_client,
         },
@@ -145,7 +134,7 @@ def build_google_async_client() -> tuple["genai.Client", httpx.AsyncClient]:
     client = genai.Client(
         api_key="not-used",
         http_options={
-            "base_url": _resolve_google_base_url(),
+            "base_url": GOOGLE_BASE_URL,
             "headers": headers,
             "httpx_async_client": http_client,
         },

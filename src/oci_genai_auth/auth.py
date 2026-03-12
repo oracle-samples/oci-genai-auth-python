@@ -58,8 +58,6 @@ class HttpxOciAuth(httpx.Auth, ABC):
         Returns:
             bool: True if token should be refreshed, False otherwise
         """
-        if not self._last_refresh:
-            return True
         current_time = time.time()
         return (current_time - self._last_refresh) >= self.refresh_interval
 
@@ -71,7 +69,7 @@ class HttpxOciAuth(httpx.Auth, ABC):
         """
         pass
 
-    def _refresh_if_needed(self) -> None:
+    def _refresh_if_needed(self) -> OciAuthSigner:
         """
         Refresh the signer if enough time has passed since last refresh.
         This method is thread-safe and will only refresh once per interval.
@@ -84,9 +82,12 @@ class HttpxOciAuth(httpx.Auth, ABC):
                     self._last_refresh = time.time()
                     logger.info("%s token refresh completed successfully", self.__class__.__name__)
                 except Exception as e:
-                    logger.exception("Warning: Token refresh failed:", e)
+                    logger.exception("Token refresh failed")
+            return self.signer
 
-    def _sign_request(self, request: httpx.Request, content: bytes) -> None:
+    def _sign_request(
+        self, request: httpx.Request, content: bytes, signer: OciAuthSigner
+    ) -> None:
         """
         Sign the given HTTPX request with the OCI signer using the provided content.
         Updates request.headers in place with the signed headers.
@@ -109,7 +110,7 @@ class HttpxOciAuth(httpx.Auth, ABC):
             data=content,
         )
         prepared_request = req.prepare()
-        self.signer.do_request_sign(prepared_request)  # type: ignore
+        signer.do_request_sign(prepared_request)  # type: ignore
         request.headers.update(prepared_request.headers)
 
     @override
@@ -127,7 +128,7 @@ class HttpxOciAuth(httpx.Auth, ABC):
             httpx.Request: The authenticated request
         """
         # Check and refresh token if needed
-        self._refresh_if_needed()
+        signer = self._refresh_if_needed()
 
         # Read the request content to handle streaming requests properly
         try:
@@ -136,7 +137,7 @@ class HttpxOciAuth(httpx.Auth, ABC):
             # For streaming requests, we need to read the content first
             content = request.read()
 
-        self._sign_request(request, content)
+        self._sign_request(request, content, signer)
 
         response = yield request
 
@@ -147,10 +148,11 @@ class HttpxOciAuth(httpx.Auth, ABC):
                 try:
                     self._refresh_signer()
                     self._last_refresh = time.time()
-                    self._sign_request(request, content)
+                    signer = self.signer
+                    self._sign_request(request, content, signer)
                     yield request
                 except Exception as e:
-                    logger.exception("Token refresh on 401 failed:", e)
+                    logger.exception("Token refresh on 401 failed")
 
 
 class OciSessionAuth(HttpxOciAuth):
@@ -169,7 +171,7 @@ class OciSessionAuth(HttpxOciAuth):
         config_file: str = DEFAULT_LOCATION,
         profile_name: str = DEFAULT_PROFILE,
         refresh_interval: int = 3600,
-        **kwargs: Mapping[str, Any],
+        **kwargs: Any,
     ):
         """
         Initialize a Security Token-based OCI signer.

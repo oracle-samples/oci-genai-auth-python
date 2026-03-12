@@ -34,6 +34,11 @@ class _DummyAuth(HttpxOciAuth):
         self.signer = _DummySigner(f"signed-{self.refresh_calls}")
 
 
+class _BrokenRefreshAuth(HttpxOciAuth):
+    def _refresh_signer(self) -> None:
+        raise ConnectionError("metadata service unreachable")
+
+
 def test_auth_flow_signs_request():
     auth = _DummyAuth(_DummySigner("signed-0"))
     request = httpx.Request(
@@ -69,6 +74,20 @@ def test_refresh_if_needed_calls_refresh_signer():
     auth = _DummyAuth(_DummySigner("signed-0"), refresh_interval=0)
     auth._refresh_if_needed()
     assert auth.refresh_calls == 1
+
+
+def test_refresh_failure_does_not_break_auth_flow(caplog):
+    auth = _BrokenRefreshAuth(_DummySigner("signed-0"), refresh_interval=0)
+    request = httpx.Request("GET", "https://example.com")
+
+    with caplog.at_level("ERROR"):
+        flow = auth.auth_flow(request)
+        signed_request = next(flow)
+
+    assert signed_request.headers["authorization"] == "signed-0"
+    assert any(
+        "Token refresh failed" in record.message for record in caplog.records
+    )
 
 
 def test_session_auth_initializes_signer_from_config():
