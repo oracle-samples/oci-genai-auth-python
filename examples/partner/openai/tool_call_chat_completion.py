@@ -6,9 +6,9 @@
 import json
 from typing import Dict
 
-from examples.partner.openai import common
+from examples.partner import common
 
-MODEL = "openai.gpt-4.1"
+MODEL = "openai.gpt-5.2"
 
 
 def get_current_weather(location: str, unit: str = "fahrenheit") -> Dict[str, str]:
@@ -22,7 +22,7 @@ def get_current_weather(location: str, unit: str = "fahrenheit") -> Dict[str, st
 
 
 def main():
-    openai_client = common.build_openai_pt_client()
+    openai_client = common.build_openai_client()
 
     messages = [
         {

@@ -7,37 +7,14 @@ The **OCI GenAI Auth** Python library provides OCI request-signing helpers for t
 
 ## Table of Contents
 
-- [Before you start](#before-you-start)
 - [Using OCI IAM Auth](#using-oci-iam-auth)
 - [Using API Key Auth](#using-api-key-auth)
 - [Using AgentHub APIs (non-passthrough)](#using-agenthub-apis-non-passthrough)
 - [Using Partner APIs (passthrough)](#using-partner-apis-passthrough)
 - [Running the Examples](#running-the-examples)
-
-## Before you start
-
-**Important!**
-
-Note that this package, as well as API keys package described below, only supports OpenAI, xAi Grok and Meta LLama models on OCI Generative AI.
-
-Before you start using this package, determine if this is the right option for you.
-
-If you are looking for a seamless way to port your code from an OpenAI compatible endpoint to OCI Generative AI endpoint, and you are currently using OpenAI-style API keys, you might want to use [OCI Generative AI API Keys](https://docs.oracle.com/en-us/iaas/Content/generative-ai/api-keys.htm) instead.
-
-With OCI Generative AI API Keys, use the native `openai` SDK like before. Just update the `base_url`, create API keys in your OCI console, insure the policy granting the key access to generative AI services is present and you are good to go.
-
-- Create an API key in Console: **Generative AI** -> **API Keys**
-- Create a security policy: **Identity & Security** -> **Policies**
-
-To authorize a specific API Key
-```
-allow any-user to use generative-ai-family in compartment <compartment-name> where ALL { request.principal.type='generativeaiapikey', request.principal.id='ocid1.generativeaiapikey.oc1.us-chicago-1....' }
-```
-
-To authorize any API Key
-```
-allow any-user to use generative-ai-family in compartment <compartment-name> where ALL { request.principal.type='generativeaiapikey' }
-```
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
 
 ## Using OCI IAM Auth
 
@@ -57,7 +34,7 @@ client = OpenAI(
 
 ## Using API Key Auth
 
-Use OCI Generative AI API Keys if you want a direct API-key workflow with the OpenAI SDK.
+Use OCI Generative AI API Keys if you want a direct API-key workflow with the OpenAI SDK. In-order to create the OCI Generative AI API Keys, follow [this guide](https://docs.oracle.com/en-us/iaas/Content/generative-ai/api-keys.htm)
 
 ```python
 import os
@@ -115,3 +92,18 @@ client = OpenAI(
 3. Install optional dev dependencies: `pip install -e '.[dev]'`.
 
 Run an example either by calling its `main()` method or from the command line.
+
+## Contributing
+
+*If your project has specific contribution requirements, update the CONTRIBUTING.md file to ensure those requirements are clearly explained*
+
+This project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
+
+## Security
+
+Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process
+
+## License
+Copyright (c) 2026 Oracle and/or its affiliates.
+
+Released under the Universal Permissive License v1.0 as shown at https://oss.oracle.com/licenses/upl/.

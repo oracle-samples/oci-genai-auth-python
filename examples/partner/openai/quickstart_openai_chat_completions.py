@@ -5,17 +5,17 @@
 
 import logging
 
-from examples.partner.openai import common
+from examples.partner import common
 
 logging.basicConfig(level=logging.DEBUG)
 
+MODEL="openai.gpt-5.2"
 
 def main():
-    client = common.build_openai_pt_client()
-    model = "meta.llama-4-scout-17b-16e-instruct"
+    client = common.build_openai_client()
 
     completion = client.chat.completions.create(
-        model="openai.gpt-4.1",
+        model=MODEL,
         messages=[
             {
                 "role": "user",
@@ -29,7 +29,7 @@ def main():
     print("=" * 80)
     print("Process in streaming mode")
     streaming = client.chat.completions.create(
-        model=model,
+        model=MODEL,
         messages=[
             {
                 "role": "user",
