@@ -5,13 +5,13 @@
 
 from rich import print
 
-from examples.partner.openai import common
+from examples.partner import common
 
-MODEL = "openai.gpt-4.1"
+MODEL = "openai.gpt-5.2"
 
 
 def main():
-    openai_client = common.build_openai_pt_client()
+    openai_client = common.build_openai_client()
 
     completion = openai_client.chat.completions.create(
         model=MODEL,

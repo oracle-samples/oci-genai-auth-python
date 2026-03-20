@@ -7,7 +7,7 @@ import os
 
 from openai import OpenAI
 
-MODEL = "openai.gpt-4.1"
+MODEL = "openai.gpt-5.2"
 
 
 def main() -> None:
