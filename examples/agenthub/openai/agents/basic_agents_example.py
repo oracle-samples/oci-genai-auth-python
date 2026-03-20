@@ -8,12 +8,12 @@ import asyncio
 
 from agents import Agent, Runner, set_default_openai_client, trace
 
-from examples import common
+from examples.agenthub.openai import common
 
 MODEL = "openai.gpt-4o"
 
 # Set the OCI OpenAI Client as the default client to use with OpenAI Agents
-set_default_openai_client(common.build_openai_agenthub_async_client())
+set_default_openai_client(common.build_agenthub_async_client())
 
 
 async def main():

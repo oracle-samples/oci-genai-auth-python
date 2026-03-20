@@ -3,11 +3,11 @@
 
 """Demonstrates CRUD operations for conversations in AgentHub."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     # Create a conversation
     conversation = client.conversations.create(

@@ -3,11 +3,11 @@
 
 """Demonstrates providing file input by file ID to the Responses API."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     # Upload a file first
     with open("../files/sample_doc.pdf", "rb") as f:

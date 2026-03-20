@@ -3,11 +3,11 @@
 
 """Demonstrates using a GPT OSS on-demand model with the Responses API."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     response = client.responses.create(
         model="openai.gpt-oss-120b",

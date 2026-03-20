@@ -3,13 +3,13 @@
 
 """Demonstrates CRUD operations for vector store files."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 VECTOR_STORE_ID = "<<VECTOR_STORE_OCID>>"
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
     # Create the file
     with open("../files/sample_doc.pdf", "rb") as f:
         file = client.files.create(

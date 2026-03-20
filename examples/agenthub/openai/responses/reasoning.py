@@ -3,11 +3,11 @@
 
 """Demonstrates a reasoning-style Responses API request."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     prompt = """
     Write a bash script that takes a matrix represented as a string with

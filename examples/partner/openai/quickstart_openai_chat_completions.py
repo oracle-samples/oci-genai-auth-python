@@ -5,7 +5,7 @@
 
 import logging
 
-from examples import common
+from examples.partner.openai import common
 
 logging.basicConfig(level=logging.DEBUG)
 

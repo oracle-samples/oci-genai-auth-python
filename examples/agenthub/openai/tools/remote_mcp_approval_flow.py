@@ -3,11 +3,11 @@
 
 """Demonstrates an approval flow for remote MCP tools."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     # First API request - Ask the model to call the MCP server,
     # and requires your approval to execute the tool call

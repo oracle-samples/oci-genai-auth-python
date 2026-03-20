@@ -6,7 +6,7 @@
 import base64
 from pathlib import Path
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def encode_image(image_path):
@@ -15,7 +15,7 @@ def encode_image(image_path):
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     # assuming the file "Cat.jpg" is in the same directory as this script
     image_file_path = Path(__file__).parent / "Cat.jpg"

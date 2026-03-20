@@ -5,13 +5,13 @@
 
 import time
 
-from examples import common
+from examples.agenthub.openai import common
 
 MODEL = "openai.gpt-5.1"
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
     # First conversation - store only (no recall)
     conversation1 = client.conversations.create(
         metadata={

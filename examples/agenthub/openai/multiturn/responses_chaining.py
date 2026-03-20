@@ -3,13 +3,13 @@
 
 """Demonstrates chaining responses across multiple turns."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 model = "xai.grok-4-1-fast-reasoning"
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
     # First turn
     response1 = client.responses.create(
         model=model,

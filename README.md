@@ -110,7 +110,7 @@ client = OpenAI(
 
 ## Running the Examples
 
-1. Update `examples/common.py` with your `COMPARTMENT_ID`, `PROJECT_OCID`, and set the correct `REGION`.
+1. Update `examples/agenthub/openai/common.py` and/or `examples/partner/openai/common.py` with your `COMPARTMENT_ID`, `PROJECT_OCID`, and set the correct `REGION`.
 2. Set the `OPENAI_API_KEY` environment variable when an example uses API key authentication.
 3. Install optional dev dependencies: `pip install -e '.[dev]'`.
 

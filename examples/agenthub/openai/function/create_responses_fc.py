@@ -9,14 +9,14 @@ from openai.types.responses import ResponseFunctionToolCall
 from openai.types.responses.response_input_param import FunctionCallOutput
 from rich import print
 
-from examples import common
+from examples.agenthub.openai import common
 from examples.fc_tools import execute_function_call, fc_tools
 
 MODEL = "openai.gpt-4.1"
 
 
 def main():
-    openai_client = common.build_openai_agenthub_client()
+    openai_client = common.build_agenthub_client()
 
     # Creates first request
     response = openai_client.responses.create(

@@ -3,11 +3,11 @@
 
 """Demonstrates deleting a response from the Responses API."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     # Create a response first
     response = client.responses.create(

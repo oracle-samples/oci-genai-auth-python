@@ -5,11 +5,11 @@
 
 import time
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    dp_client = common.build_openai_agenthub_client()
+    dp_client = common.build_agenthub_client()
     with open("../files/sample_doc.pdf", "rb") as f:
         # Upload a file using the Files API
         file = dp_client.files.create(
@@ -19,7 +19,7 @@ def main():
         print(f"Uploaded file:{file.id}, waiting for it to be processed")
         # dp_client.files.wait_for_processing(file.id)
 
-        cp_client = common.build_openai_agenthub_cp_client()
+        cp_client = common.build_agenthub_cp_client()
         # Create a vector store
         vector_store = cp_client.vector_stores.create(
             name="OCI Support FAQ Vector Store",

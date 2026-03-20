@@ -5,7 +5,7 @@
 
 from pydantic import BaseModel
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 class CalendarEvent(BaseModel):
@@ -15,7 +15,7 @@ class CalendarEvent(BaseModel):
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     response = client.responses.parse(
         model="xai.grok-4-1-fast-reasoning",

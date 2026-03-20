@@ -3,13 +3,13 @@
 
 """Demonstrates the file_search tool in AgentHub."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 VECTOR_STORE_ID = "<<VECTORE_STORE_ID>>"
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     response = client.responses.create(
         model="xai.grok-4-1-fast-reasoning",

@@ -3,11 +3,11 @@
 
 """Demonstrates the web_search tool in AgentHub."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     response = client.responses.create(
         model="openai.gpt-5.1",

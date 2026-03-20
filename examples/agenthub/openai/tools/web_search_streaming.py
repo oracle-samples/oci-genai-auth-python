@@ -3,11 +3,11 @@
 
 """Demonstrates streaming results from the web_search tool."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     response_stream = client.responses.create(
         model="openai.gpt-5.1",

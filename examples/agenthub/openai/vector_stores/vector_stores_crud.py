@@ -3,11 +3,11 @@
 
 """Vector Stores API examples - create, list, retrieve, update, search, and delete."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    cp_client = common.build_openai_agenthub_cp_client()
+    cp_client = common.build_agenthub_cp_client()
     # Create a vector store
     vector_store = cp_client.vector_stores.create(
         name="OCI Support FAQ Vector Store",

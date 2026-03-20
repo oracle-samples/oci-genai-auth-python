@@ -3,7 +3,7 @@
 
 """Demonstrates streaming chat completion responses for the Partner (pass-through) endpoint."""
 
-from examples import common
+from examples.partner.openai import common
 
 MODEL = "openai.gpt-4.1"
 

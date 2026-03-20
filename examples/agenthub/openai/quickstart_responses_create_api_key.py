@@ -16,7 +16,7 @@ import os
 
 from openai import OpenAI
 
-from examples.common import PROJECT_OCID
+from examples.agenthub.openai.common import PROJECT_OCID
 
 
 def main():

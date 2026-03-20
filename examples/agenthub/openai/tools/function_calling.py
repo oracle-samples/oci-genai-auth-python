@@ -8,7 +8,7 @@ import json
 from openai.types.responses import ResponseFunctionToolCall
 from openai.types.responses.response_input_param import FunctionCallOutput
 
-from examples import common
+from examples.agenthub.openai import common
 
 model = "xai.grok-4-1-fast-reasoning"
 
@@ -25,7 +25,7 @@ def get_current_weather(location: str) -> dict:
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     # Define function tool schema
     function_tools = [

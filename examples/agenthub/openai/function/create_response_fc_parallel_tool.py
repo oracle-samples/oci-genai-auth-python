@@ -5,14 +5,14 @@
 
 from rich import print
 
-from examples import common
+from examples.agenthub.openai import common
 from examples.fc_tools import fc_tools
 
 MODEL = "openai.gpt-4.1"
 
 
 def main():
-    openai_client = common.build_openai_agenthub_client()
+    openai_client = common.build_agenthub_client()
     # parrel_call
     response = openai_client.responses.create(
         model=MODEL,

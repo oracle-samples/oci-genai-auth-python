@@ -3,11 +3,11 @@
 
 """Demonstrates using multiple tools in a single request."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
 
     response_stream = client.responses.create(
         model="openai.gpt-5.1",

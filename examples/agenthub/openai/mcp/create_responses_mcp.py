@@ -5,13 +5,13 @@
 
 from rich import print
 
-from examples import common
+from examples.agenthub.openai import common
 
 MODEL = "openai.gpt-4.1"
 
 
 def main():
-    openai_client = common.build_openai_agenthub_client()
+    openai_client = common.build_agenthub_client()
 
     tools = [
         {

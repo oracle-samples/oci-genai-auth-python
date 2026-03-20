@@ -5,7 +5,7 @@
 
 from rich import print
 
-from examples import common
+from examples.partner.openai import common
 
 MODEL = "openai.gpt-4.1"
 

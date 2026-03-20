@@ -5,11 +5,11 @@
 
 from pathlib import Path
 
-from examples import common
+from examples.agenthub.openai import common
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
     # List files in the project
     files_list = client.files.list(order="asc")
     for file in files_list.data:

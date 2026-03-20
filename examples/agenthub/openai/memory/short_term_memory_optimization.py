@@ -3,13 +3,13 @@
 
 """Demonstrates short-term memory optimization in AgentHub."""
 
-from examples import common
+from examples.agenthub.openai import common
 
 MODEL = "xai.grok-4-1-fast-reasoning"
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
     # Create a conversation with STMO enabled
     conversation = client.conversations.create(
         metadata={"topic": "demo", "short_term_memory_optimization": "True"},

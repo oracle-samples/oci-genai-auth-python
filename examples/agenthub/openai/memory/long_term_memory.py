@@ -5,13 +5,13 @@
 
 import time
 
-from examples import common
+from examples.agenthub.openai import common
 
 MODEL = "xai.grok-4-1-fast-reasoning"
 
 
 def main():
-    client = common.build_openai_agenthub_client()
+    client = common.build_agenthub_client()
     # First conversation - store preferences
     conversation1 = client.conversations.create(
         metadata={"memory_subject_id": "user_123456"},
