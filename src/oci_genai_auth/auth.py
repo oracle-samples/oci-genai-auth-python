@@ -81,13 +81,11 @@ class HttpxOciAuth(httpx.Auth, ABC):
                     self._refresh_signer()
                     self._last_refresh = time.time()
                     logger.info("%s token refresh completed successfully", self.__class__.__name__)
-                except Exception as e:
+                except Exception:
                     logger.exception("Token refresh failed")
             return self.signer
 
-    def _sign_request(
-        self, request: httpx.Request, content: bytes, signer: OciAuthSigner
-    ) -> None:
+    def _sign_request(self, request: httpx.Request, content: bytes, signer: OciAuthSigner) -> None:
         """
         Sign the given HTTPX request with the OCI signer using the provided content.
         Updates request.headers in place with the signed headers.
@@ -95,14 +93,6 @@ class HttpxOciAuth(httpx.Auth, ABC):
         # Strip any SDK auth headers to avoid conflicting with OCI signing.
         request.headers.pop("Authorization", None)
         request.headers.pop("X-Api-Key", None)
-        request.headers.pop("x-goog-api-key", None)
-
-        # Remove Google API key query parameter if present.
-        params = list(request.url.params.multi_items())
-        if params:
-            filtered = [(key, value) for key, value in params if key.lower() != "key"]
-            if len(filtered) != len(params):
-                request.url = request.url.copy_with(params=filtered)
         req = requests.Request(
             method=request.method,
             url=str(request.url),
@@ -151,7 +141,7 @@ class HttpxOciAuth(httpx.Auth, ABC):
                     signer = self.signer
                     self._sign_request(request, content, signer)
                     yield request
-                except Exception as e:
+                except Exception:
                     logger.exception("Token refresh on 401 failed")
 
 

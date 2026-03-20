@@ -1,88 +1,24 @@
-*This repository acts as a template for all of Oracle’s GitHub repositories. It contains information about the guidelines for those repositories. All files and sections contained in this template are mandatory, and a GitHub app ensures alignment with these guidelines. To get started with a new repository, replace the italic paragraphs with the respective text for your project.*
-
-# Project name
-
-*Describe your project's features, functionality and target audience*
-
-## Installation
-
-*Provide detailed step-by-step installation instructions. You can name this section **How to Run** or **Getting Started** instead of **Installation** if that's more acceptable for your project*
-
-## Documentation
-
-*Developer-oriented documentation can be published on GitHub, but all product documentation must be published on <https://docs.oracle.com>*
-
-## Examples
-
-*Describe any included examples or provide a link to a demo/tutorial*
-
-## Help
-
-*Inform users on where to get help or how to receive official support from Oracle (if applicable)*
-
-## Contributing
-
-*If your project has specific contribution requirements, update the CONTRIBUTING.md file to ensure those requirements are clearly explained*
-
-This project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
-
-## Security
-
-Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process
-
-## License
-
-*The correct copyright notice format for both documentation and software is*
-    "Copyright (c) [year,] year Oracle and/or its affiliates."
-*You must include the year the content was first released (on any platform) and the most recent year in which it was revised*
-
-Copyright (c) 2026 Oracle and/or its affiliates.
-
-*Replace this statement if your project is not licensed under the UPL*
-
-Released under the Universal Permissive License v1.0 as shown at
-<https://oss.oracle.com/licenses/upl/>.
-=======
 # oci-genai-auth
 
 [![PyPI - Version](https://img.shields.io/pypi/v/oci-genai-auth.svg)](https://pypi.org/project/oci-genai-auth)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oci-genai-auth.svg)](https://pypi.org/project/oci-genai-auth)
 
-The **OCI GenAI Auth** Python library provides secure and convenient access to the OpenAI-compatible REST API hosted by **OCI Generative AI Service** and **OCI Data Science Model Deployment** Service.
-
----
+The **OCI GenAI Auth** Python library provides OCI request-signing helpers for the OpenAI-compatible REST APIs hosted by OCI Generative AI. Partner/Passthrough endpoints do not store conversation history on OCI servers, while AgentHub (non-passthrough) stores data on OCI-managed servers.
 
 ## Table of Contents
 
-- [oci-genai-auth](#oci-genai-auth)
-  - [Table of Contents](#table-of-contents)
-  - [Before You Start](#before-you-start)
-  - [Installation](#installation)
-  - [Examples](#examples)
-    - [OCI Generative AI](#oci-generative-ai)
-      - [Using the Native OpenAI Client](#using-the-native-openai-client)
-      - [Using with Langchain](#using-with-langchain-openai)
-    - [Google Gen AI (Gemini)](#google-gen-ai-gemini)
-      - [Using the Native Google Gen AI Client](#using-the-native-google-gen-ai-client)
-      - [Generate Images](#generate-images)
-      - [Async Generate Content](#async-generate-content)
-    - [Anthropic](#anthropic)
-      - [Using the Native Anthropic Client](#using-the-native-anthropic-client)
-      - [Async Messages](#async-messages)
-    - [OCI Data Science Model Deployment](#oci-data-science-model-deployment)
-      - [Using the Native OpenAI Client](#using-the-native-openai-client-1)
-    - [Signers](#signers)
-  - [Contributing](#contributing)
-  - [Security](#security)
-  - [License](#license)
-
----
+- [Before you start](#before-you-start)
+- [Using OCI IAM Auth](#using-oci-iam-auth)
+- [Using API Key Auth](#using-api-key-auth)
+- [Using AgentHub APIs (non-passthrough)](#using-agenthub-apis-non-passthrough)
+- [Using Partner APIs (passthrough)](#using-partner-apis-passthrough)
+- [Running the Examples](#running-the-examples)
 
 ## Before you start
 
 **Important!**
 
-This package provides OCI request-signing helpers for `httpx`. It does not ship OCI-specific SDK clients. Use the native OpenAI SDK with a custom `httpx` client that applies OCI signing.
+Note that this package, as well as API keys package described below, only supports OpenAI, xAi Grok and Meta LLama models on OCI Generative AI.
 
 Before you start using this package, determine if this is the right option for you.
 
@@ -103,396 +39,79 @@ To authorize any API Key
 allow any-user to use generative-ai-family in compartment <compartment-name> where ALL { request.principal.type='generativeaiapikey' }
 ```
 
-- Update the `base_url` in your code:
+## Using OCI IAM Auth
+
+Use OCI IAM auth when you want to sign requests with your OCI profile (session/user/resource/instance principal) instead of API keys.
 
 ```python
+import httpx
 from openai import OpenAI
+from oci_genai_auth import OciSessionAuth
+
+client = OpenAI(
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+    api_key="not-used",
+    http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
+)
+```
+
+## Using API Key Auth
+
+Use OCI Generative AI API Keys if you want a direct API-key workflow with the OpenAI SDK.
+
+```python
 import os
-
-API_KEY=os.getenv("OPENAI_API_KEY")
-
-print(API_KEY)
+from openai import OpenAI
 
 client = OpenAI(
-    api_key=API_KEY,
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+    api_key=os.getenv("OPENAI_API_KEY"),
 )
-
-# Responses API
-response = client.responses.create(
-    model="openai.gpt-oss-120b",
-    # model="xai.grok-3",
-    # meta models are not supported with the Responses API
-    input="Write a one-sentence bedtime story about a unicorn."
-)
-print(response)
-
-# Completion API
-response = client.chat.completions.create(
-    # model="openai.gpt-oss-120b",
-    # model="meta.llama-3.3-70b-instruct",
-    model="xai.grok-3",
-    messages=[{
-        "role": "user", 
-        "content": "Write a one-sentence bedtime story about a unicorn."
-        }
-    ]
-)
-print(response)
 ```
 
+## Using AgentHub APIs (non-passthrough)
 
-API Keys offer a seamless transition from code using the openai SDK, and allow usage in 3rd party code or services that don't offer an override of the http client.
-
-However, if authentication at the user, compute instance, resource or workload level (OKE pods) is preferred, this package is for you.
-
-It offers the same compatibility with the `openai` SDK, but requires patching the http client. See the following instruction on how to use it.
-
-## Installation
-
-```console
-pip install oci-genai-auth
-```
-
-Install the SDKs you plan to use separately, for example:
-
-```console
-pip install openai
-pip install anthropic
-pip install google-genai
-```
-
----
-
-## Examples
-
-### OCI Generative AI
-
-Notes:
-
-- **Cohere models do not support OpenAI-compatible API**
-- **OCI Generative AI requires the OpenAI SDK base URL to end with `/openai/v1`**
-
-#### Using the Native OpenAI Client
+AgentHub runs in non-pass-through mode and provides a unified interface for interacting with models and agentic capabilities.
+It is compatible with OpenAI's Responses API and the Open Responses Spec, enabling developers/users to: build agents with OpenAI SDK.
+Only the project OCID is required.
 
 ```python
-
 import httpx
 from openai import OpenAI
 from oci_genai_auth import OciSessionAuth
 
-# Example for OCI Generative AI endpoint
 client = OpenAI(
-    api_key="not-used",
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
-    http_client=httpx.Client(
-        auth=OciSessionAuth(profile_name="<profile name>"),
-        headers={
-            "CompartmentId": "<compartment ocid>",
-            "opc-compartment-id": "<compartment ocid>",
-        },
-    ),
-)
-
-completion = client.chat.completions.create(
-    model="<model name>",
-    messages=[
-        {
-            "role": "user",
-            "content": "How do I output all files in a directory using Python?",
-        },
-    ],
-)
-print(completion.model_dump_json())
-
-```
-
-If you only need the auth helpers (no OCI-specific OpenAI shim client), you can import them from
-`oci_genai_auth` which only exposes the signer classes used by `httpx`.
-
-#### Using with langchain-openai
-
-```python
-from langchain_openai import ChatOpenAI
-import httpx
-from oci_genai_auth import OciUserPrincipalAuth
-
-
-llm = ChatOpenAI(
-    model="<model name>",  # for example "xai.grok-4-fast-reasoning"
     api_key="not-used",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
-    http_client=httpx.Client(
-        auth=OciUserPrincipalAuth(profile_name="<profile name>"),
-        headers={
-            "CompartmentId": "<compartment ocid>",
-            "opc-compartment-id": "<compartment ocid>",
-        },
-    ),
-    # use_responses_api=True
-    # stream_usage=True,
-    # temperature=None,
-    # max_tokens=None,
-    # timeout=None,
-    # reasoning_effort="low",
-    # max_retries=2,
-    # other params...
+    project="ocid1.generativeaiproject.oc1.us-chicago-1.aaaaaaaaexample",
+    http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
 )
-
-messages = [
-    (
-        "system",
-        "You are a helpful assistant that translates English to French. Translate the user sentence.",
-    ),
-    ("human", "I love programming."),
-]
-ai_msg = llm.invoke(messages)
-print(ai_msg)
 ```
 
----
+## Using Partner APIs (passthrough)
 
-### Google Gen AI (Gemini)
-
-#### Using the Native Google Gen AI Client
+Partner endpoints run in pass-through mode and require the compartment OCID header.
 
 ```python
-import httpx
-from google import genai
-from oci_genai_auth import OciSessionAuth
-
-client = genai.Client(
-    api_key="not-used",
-    http_options={
-        "base_url": "https://<your-oci-endpoint>",
-        "httpx_client": httpx.Client(
-            auth=OciSessionAuth(profile_name="<profile name>"),
-            headers={
-                "CompartmentId": "<compartment ocid>",
-                "opc-compartment-id": "<compartment ocid>",
-            },
-        ),
-    },
-)
-
-response = client.models.generate_content(
-    model="gemini-2.0-flash-001",
-    contents="Write a one-sentence bedtime story about a unicorn.",
-)
-print(response)
-```
-
-#### Generate Images
-
-```python
-import httpx
-from google import genai
-from oci_genai_auth import OciSessionAuth
-
-client = genai.Client(
-    api_key="not-used",
-    http_options={
-        "base_url": "https://<your-oci-endpoint>",
-        "httpx_client": httpx.Client(
-            auth=OciSessionAuth(profile_name="<profile name>"),
-            headers={
-                "CompartmentId": "<compartment ocid>",
-                "opc-compartment-id": "<compartment ocid>",
-            },
-        ),
-    },
-)
-
-response = client.models.generate_images(
-    model="imagen-3.0-generate-002",
-    prompt="A poster of a mythical dragon in a neon city.",
-)
-print(response)
-```
-
-#### Async Generate Content
-
-```python
-import asyncio
-
-import httpx
-from google import genai
-from oci_genai_auth import OciSessionAuth
-
-async def main() -> None:
-    http_client = httpx.AsyncClient(
-        auth=OciSessionAuth(profile_name="<profile name>"),
-        headers={
-            "CompartmentId": "<compartment ocid>",
-            "opc-compartment-id": "<compartment ocid>",
-        },
-    )
-
-    client = genai.Client(
-        api_key="not-used",
-        http_options={
-            "base_url": "https://<your-oci-endpoint>",
-            "httpx_async_client": http_client,
-        },
-    )
-
-    response = await client.aio.models.generate_content(
-        model="gemini-2.0-flash-001",
-        contents="Write a one-sentence bedtime story about a unicorn.",
-    )
-    print(response)
-    await http_client.aclose()
-
-asyncio.run(main())
-```
-
----
-
-### Anthropic
-
-#### Using the Native Anthropic Client
-
-```python
-import httpx
-from anthropic import Anthropic
-from oci_genai_auth import OciSessionAuth
-
-client = Anthropic(
-    api_key="not-used",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/anthropic",
-    http_client=httpx.Client(
-        auth=OciSessionAuth(profile_name="<profile name>"),
-        headers={
-            "CompartmentId": "<compartment ocid>",
-            "opc-compartment-id": "<compartment ocid>",
-        },
-    ),
-)
-
-message = client.messages.create(
-    model="claude-3-5-sonnet-20241022",
-    max_tokens=256,
-    messages=[{"role": "user", "content": "Write a one-sentence bedtime story about a unicorn."}],
-)
-print(message)
-```
-
-#### Async Messages
-
-```python
-import asyncio
-
-import httpx
-from anthropic import AsyncAnthropic
-from oci_genai_auth import OciSessionAuth
-
-async def main() -> None:
-    client = AsyncAnthropic(
-        api_key="not-used",
-        base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/anthropic",
-        http_client=httpx.AsyncClient(
-            auth=OciSessionAuth(profile_name="<profile name>"),
-            headers={
-                "CompartmentId": "<compartment ocid>",
-                "opc-compartment-id": "<compartment ocid>",
-            },
-        ),
-    )
-
-    message = await client.messages.create(
-        model="claude-3-5-sonnet-20241022",
-        max_tokens=256,
-        messages=[{"role": "user", "content": "Write a one-sentence bedtime story about a unicorn."}],
-    )
-    print(message)
-    await client.close()
-
-asyncio.run(main())
-```
-
----
-
-### OCI Data Science Model Deployment
-
-#### Using the Native OpenAI Client
-
-```python
-
 import httpx
 from openai import OpenAI
 from oci_genai_auth import OciSessionAuth
 
-# Example for OCI Data Science Model Deployment endpoint
 client = OpenAI(
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/v1",
     api_key="not-used",
-    base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
-    http_client=httpx.Client(auth=OciSessionAuth()),
+    default_headers={
+        "opc-compartment-id": "ocid1.compartment.oc1..aaaaaaaaexample",
+    },
+    http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
 )
-
-response = client.chat.completions.create(
-    model="<model-name>",
-    messages=[
-        {
-            "role": "user",
-            "content": "Explain how to list all files in a directory using Python.",
-        },
-    ],
-)
-print(response.model_dump_json())
 ```
 
-### Signers
 
-The library supports multiple OCI authentication methods (signers). Choose the one that matches your runtime environment and security posture.
+## Running the Examples
 
-Supported signers
+1. Update `examples/common.py` with your `COMPARTMENT_ID`, `PROJECT_OCID`, and set the correct `REGION`.
+2. Set the `OPENAI_API_KEY` environment variable when an example uses API key authentication.
+3. Install optional dev dependencies: `pip install -e '.[dev]'`.
 
-- `OciSessionAuth` — Uses an OCI session token from your local OCI CLI profile.
-- `OciResourcePrincipalAuth` — Uses Resource Principal auth.
-- `OciInstancePrincipalAuth` — Uses Instance Principal auth. Best for OCI Compute instances with dynamic group policies.
-- `OciUserPrincipalAuth` — Uses an OCI user API key. Suitable for service accounts/automation where API keys are managed securely.
-
-Minimal examples of constructing each auth type:
-
-```python
-from oci_genai_auth import (
-    OciSessionAuth,
-    OciResourcePrincipalAuth,
-    OciInstancePrincipalAuth,
-    OciUserPrincipalAuth,
-)
-
-# 1) Session (local dev; uses ~/.oci/config + session token)
-session_auth = OciSessionAuth(profile_name="DEFAULT")
-
-# 2) Resource Principal (OCI services with RP)
-rp_auth = OciResourcePrincipalAuth()
-
-# 3) Instance Principal (OCI Compute)
-ip_auth = OciInstancePrincipalAuth()
-
-# 4) User Principal (API key in ~/.oci/config)
-up_auth = OciUserPrincipalAuth(profile_name="DEFAULT")
-```
-
----
-
-## Contributing
-
-This project welcomes contributions from the community.
-Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md).
-
----
-
-## Security
-
-Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process.
-
----
-
-## License
-
-Copyright (c) 2026 Oracle and/or its affiliates.
-
-Released under the Universal Permissive License v1.0 as shown at
-[https://oss.oracle.com/licenses/upl/](https://oss.oracle.com/licenses/upl/)
+Run an example either by calling its `main()` method or from the command line.

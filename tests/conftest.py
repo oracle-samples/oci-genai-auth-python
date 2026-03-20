@@ -12,7 +12,7 @@ def _disable_openai_agents_tracing():
     os.environ.setdefault("OPENAI_AGENTS_DISABLE_TRACING", "true")
     try:
         from agents.tracing import set_tracing_disabled
-    except Exception:
+    except (ImportError, ModuleNotFoundError):
         yield
         return
     set_tracing_disabled(True)

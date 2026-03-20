@@ -43,19 +43,16 @@ def test_auth_flow_signs_request():
     auth = _DummyAuth(_DummySigner("signed-0"))
     request = httpx.Request(
         "GET",
-        "https://example.com?key=secret&foo=bar",
+        "https://example.com?foo=bar",
         headers={
             "Authorization": "Bearer test",
             "X-Api-Key": "api-key",
-            "x-goog-api-key": "google-key",
         },
     )
     flow = auth.auth_flow(request)
     signed_request = next(flow)
     assert signed_request.headers["authorization"] == "signed-0"
     assert "x-api-key" not in signed_request.headers
-    assert "x-goog-api-key" not in signed_request.headers
-    assert "key" not in signed_request.url.params
     assert signed_request.url.params.get("foo") == "bar"
 
 
@@ -85,9 +82,7 @@ def test_refresh_failure_does_not_break_auth_flow(caplog):
         signed_request = next(flow)
 
     assert signed_request.headers["authorization"] == "signed-0"
-    assert any(
-        "Token refresh failed" in record.message for record in caplog.records
-    )
+    assert any("Token refresh failed" in record.message for record in caplog.records)
 
 
 def test_session_auth_initializes_signer_from_config():
@@ -98,11 +93,12 @@ def test_session_auth_initializes_signer_from_config():
         "user": "dummy_user",
         "fingerprint": "dummy_fingerprint",
     }
-    with patch("oci.config.from_file", return_value=config), patch(
-        "oci.signer.load_private_key_from_file", return_value="dummy_private_key"
-    ), patch("oci.auth.signers.SecurityTokenSigner") as mock_signer, patch(
-        "builtins.open", create=True
-    ) as mock_open:
+    with (
+        patch("oci.config.from_file", return_value=config),
+        patch("oci.signer.load_private_key_from_file", return_value="dummy_private_key"),
+        patch("oci.auth.signers.SecurityTokenSigner") as mock_signer,
+        patch("builtins.open", create=True) as mock_open,
+    ):
         mock_open.return_value.__enter__.return_value.read.return_value = "dummy_token"
         auth = OciSessionAuth(
             profile_name="DEFAULT",
@@ -126,9 +122,11 @@ def test_user_principal_auth_uses_signer_from_config():
         "user": "dummy_user",
         "fingerprint": "dummy_fingerprint",
     }
-    with patch("oci.config.from_file", return_value=config), patch(
-        "oci.config.validate_config", return_value=True
-    ), patch("oci.signer.Signer") as mock_signer:
+    with (
+        patch("oci.config.from_file", return_value=config),
+        patch("oci.config.validate_config", return_value=True),
+        patch("oci.signer.Signer") as mock_signer,
+    ):
         auth = OciUserPrincipalAuth(profile_name="DEFAULT")
 
     mock_signer.assert_called_once()
