@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
 
-"""Demonstrates a basic chat completion request for the Partner (pass-through) endpoint."""
+"""Demonstrates a basic chat completion request for the Partner endpoint."""
 
 from rich import print
 

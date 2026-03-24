@@ -111,13 +111,8 @@ client = OpenAI(
 )
 ```
 
-## Running the Examples
-
-1. Update `examples/agenthub/common.py` and/or `examples/partner/openai/common.py` with your `COMPARTMENT_ID`, `PROJECT_OCID`, and set the correct `REGION`.
-2. Set the `OCI_GENAI_API_KEY` environment variable when an example uses API key authentication.
-3. Install optional dev dependencies: `pip install -e '.[dev]'`.
-
-Run an example either by calling its `main()` method or from the command line.
+## Examples
+Demo code and instructions on how to run them, for both agenthub and partner usecases can be found in ```examples``` folder.
 
 ## Contributing
 

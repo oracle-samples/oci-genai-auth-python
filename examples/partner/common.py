@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
 
-"""Partner (pass-through) example clients and configuration."""
+"""Partner example clients and configuration."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ PROFILE_NAME = "DEFAULT"
 COMPARTMENT_ID = "<<ENTER_COMPARTMENT_ID>>"
 REGION = "us-chicago-1"
 
-PARTNER_OPENAI_BASE_URL = f"https://inference.generativeai.{REGION}.oci.oraclecloud.com/v1"
+PARTNER_OPENAI_BASE_URL = f"https://inference.generativeai.{REGION}.oci.oraclecloud.com/20231130/actions/v1"
 
 
 def build_openai_client() -> OpenAI:
