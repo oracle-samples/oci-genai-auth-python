@@ -3,22 +3,31 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/oci-genai-auth.svg)](https://pypi.org/project/oci-genai-auth)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oci-genai-auth.svg)](https://pypi.org/project/oci-genai-auth)
 
-The **OCI GenAI Auth** Python library provides OCI request-signing helpers for the OpenAI-compatible REST APIs hosted by OCI Generative AI. Partner/Passthrough endpoints do not store conversation history on OCI servers, while AgentHub (non-passthrough) stores data on OCI-managed servers.
+The **OCI GenAI Auth** Python library provides OCI request-signing helpers for the OpenAI-compatible REST APIs hosted by OCI Generative AI.
 
 ## Table of Contents
 
+- [Installation](#installation)
 - [Using OCI IAM Auth](#using-oci-iam-auth)
 - [Using API Key Auth](#using-api-key-auth)
-- [Using AgentHub APIs (non-passthrough)](#using-agenthub-apis-non-passthrough)
+- [Using AgentHub APIs](#using-agenthub-apis)
 - [Using Partner APIs (passthrough)](#using-partner-apis-passthrough)
 - [Running the Examples](#running-the-examples)
 - [Contributing](#contributing)
 - [Security](#security)
 - [License](#license)
 
+## Installation
+
+```bash
+pip install oci-genai-auth
+```
+
+`oci-genai-auth` is designed to work together with the official OpenAI SDK.
+
 ## Using OCI IAM Auth
 
-Use OCI IAM auth when you want to sign requests with your OCI profile (session/user/resource/instance principal) instead of API keys.
+Use OCI IAM auth when you want to sign requests with your OCI profile (session/user/resource/instance principal). Recommended if you are building OCI-native production workloads.
 
 ```python
 import httpx
@@ -34,7 +43,11 @@ client = OpenAI(
 
 ## Using API Key Auth
 
-Use OCI Generative AI API Keys if you want a direct API-key workflow with the OpenAI SDK. In-order to create the OCI Generative AI API Keys, follow [this guide](https://docs.oracle.com/en-us/iaas/Content/generative-ai/api-keys.htm)
+Use OCI Generative AI API Keys if you want a long-lived API key style auth. Recommended if you are migrating from other OpenAI-compatible API providers.
+
+To create the OCI Generative AI API Keys, follow [this guide](https://docs.oracle.com/en-us/iaas/Content/generative-ai/api-keys.htm).
+
+You don't need to install `oci-genai-auth` if you use API key auth.
 
 ```python
 import os
@@ -42,15 +55,23 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
-    api_key=os.getenv("OPENAI_API_KEY"),
+    api_key=os.getenv("OCI_GENAI_API_KEY"),
 )
 ```
 
-## Using AgentHub APIs (non-passthrough)
+## Using AgentHub APIs
 
-AgentHub runs in non-pass-through mode and provides a unified interface for interacting with models and agentic capabilities.
-It is compatible with OpenAI's Responses API and the Open Responses Spec, enabling developers/users to: build agents with OpenAI SDK.
-Only the project OCID is required.
+OCI AgentHub provides a unified API for interacting with models and agentic capabilities.
+
+- It is compatible with OpenAI's Responses API and the [Open Responses Spec](https://www.openresponses.org/specification), enabling developers to build agents with OpenAI SDK, OpenAI Agents SDK, LangChain, LangGraph, AI SDK, CrewAI, and more.
+- It offers a uniform interface, auth, billing to access multiple model providers including OpenAI, Gemini, xAI, and GPT-OSS models hosted in OCI and your Dedicated AI Cluster.
+- It provides built-in agentic primitives such as agent loop, reasoning, short-term memory, long-term memory, web search, file search, image generation, code execution, and more.
+
+In addition to the compatible endpoint to Responses API, AgentHub also offers compatible endpoints to Files API, Vector Stores API, and Containers API.
+
+Explore [examples](https://github.com/oracle-samples/oci-genai-auth-python/tree/main/examples/agenthub) to get started.
+
+Note: OpenAI commercial models and image generation are only available to Oracle internal teams at this moment.
 
 ```python
 import httpx
@@ -67,7 +88,13 @@ client = OpenAI(
 
 ## Using Partner APIs (passthrough)
 
-Partner endpoints run in pass-through mode and require the compartment OCID header.
+OCI also offers Partner API which passes through your calls to partners such as OpenAI. We will support more partners in the future.
+
+You can leverage Partner API when you want to use OpenAI's API and GPT models, but with OCI auth and billing.
+
+Note: Currently Partner API is only available to Oracle internal teams. Only features that meet partner's Zero Data Retention are available through Partner API.
+
+If you want multi-provider model access and features unavailable under partner's Zero Data Retention (such as File Search), use the AgentHub APIs above.
 
 ```python
 import httpx
@@ -75,7 +102,7 @@ from openai import OpenAI
 from oci_genai_auth import OciSessionAuth
 
 client = OpenAI(
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/v1",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
     api_key="not-used",
     default_headers={
         "opc-compartment-id": "ocid1.compartment.oc1..aaaaaaaaexample",
@@ -84,11 +111,10 @@ client = OpenAI(
 )
 ```
 
-
 ## Running the Examples
 
-1. Update `examples/agenthub/openai/common.py` and/or `examples/partner/openai/common.py` with your `COMPARTMENT_ID`, `PROJECT_OCID`, and set the correct `REGION`.
-2. Set the `OPENAI_API_KEY` environment variable when an example uses API key authentication.
+1. Update `examples/agenthub/common.py` and/or `examples/partner/openai/common.py` with your `COMPARTMENT_ID`, `PROJECT_OCID`, and set the correct `REGION`.
+2. Set the `OCI_GENAI_API_KEY` environment variable when an example uses API key authentication.
 3. Install optional dev dependencies: `pip install -e '.[dev]'`.
 
 Run an example either by calling its `main()` method or from the command line.
@@ -102,6 +128,7 @@ This project welcomes contributions from the community. Before submitting a pull
 Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process
 
 ## License
+
 Copyright (c) 2026 Oracle and/or its affiliates.
 
 Released under the Universal Permissive License v1.0 as shown at https://oss.oracle.com/licenses/upl/.
