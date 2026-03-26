@@ -10,7 +10,7 @@ The **OCI GenAI Auth** Python library provides OCI request-signing helpers for t
 - [Installation](#installation)
 - [Using OCI IAM Auth](#using-oci-iam-auth)
 - [Using API Key Auth](#using-api-key-auth)
-- [Using AgentHub APIs](#using-agenthub-apis)
+- [Using OCI Enterprise AI Agents APIs](#using-oci-enterprise-ai-agents-apis)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [Security](#security)
@@ -58,17 +58,17 @@ client = OpenAI(
 )
 ```
 
-## Using AgentHub APIs
+## Using OCI Enterprise AI Agents APIs
 
-OCI AgentHub provides a unified API for interacting with models and agentic capabilities.
+OCI Enterprise AI Agents provides a unified API for interacting with models and agentic capabilities.
 
 - It is compatible with OpenAI's Responses API and the [Open Responses Spec](https://www.openresponses.org/specification), enabling developers to build agents with OpenAI SDK, OpenAI Agents SDK, LangChain, LangGraph, AI SDK, CrewAI, and more.
 - It offers a uniform interface, auth, billing to access multiple model providers including OpenAI, Gemini, xAI, and GPT-OSS models hosted in OCI and your Dedicated AI Cluster.
 - It provides built-in agentic primitives such as agent loop, reasoning, short-term memory, long-term memory, web search, file search, image generation, code execution, and more.
 
-In addition to the compatible endpoint to Responses API, AgentHub also offers compatible endpoints to Files API, Vector Stores API, and Containers API.
+In addition to the compatible endpoint to Responses API, OCI Enterprise AI Agents also offers compatible endpoints to Files API, Vector Stores API, and Containers API.
 
-Explore [examples](https://github.com/oracle-samples/oci-genai-auth-python/tree/main/examples/agenthub) to get started.
+Explore [examples](https://github.com/oracle-samples/oci-genai-auth-python/tree/main/examples/enterprise_ai_agents) to get started.
 
 Note: OpenAI commercial models and image generation are only available to Oracle internal teams at this moment.
 
