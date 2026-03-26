@@ -11,8 +11,7 @@ The **OCI GenAI Auth** Python library provides OCI request-signing helpers for t
 - [Using OCI IAM Auth](#using-oci-iam-auth)
 - [Using API Key Auth](#using-api-key-auth)
 - [Using AgentHub APIs](#using-agenthub-apis)
-- [Using Partner APIs (passthrough)](#using-partner-apis-passthrough)
-- [Running the Examples](#running-the-examples)
+- [Examples](#examples)
 - [Contributing](#contributing)
 - [Security](#security)
 - [License](#license)
@@ -86,33 +85,8 @@ client = OpenAI(
 )
 ```
 
-## Using Partner APIs (passthrough)
-
-OCI also offers Partner API which passes through your calls to partners such as OpenAI. We will support more partners in the future.
-
-You can leverage Partner API when you want to use OpenAI's API and GPT models, but with OCI auth and billing.
-
-Note: Currently Partner API is only available to Oracle internal teams. Only features that meet partner's Zero Data Retention are available through Partner API.
-
-If you want multi-provider model access and features unavailable under partner's Zero Data Retention (such as File Search), use the AgentHub APIs above.
-
-```python
-import httpx
-from openai import OpenAI
-from oci_genai_auth import OciSessionAuth
-
-client = OpenAI(
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
-    api_key="not-used",
-    default_headers={
-        "opc-compartment-id": "ocid1.compartment.oc1..aaaaaaaaexample",
-    },
-    http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
-)
-```
-
 ## Examples
-Demo code and instructions on how to run them, for both agenthub and partner usecases can be found in ```examples``` folder.
+Demo code and instructions on how to run them can be found in the ```examples``` folder.
 
 ## Contributing
 
