@@ -10,10 +10,10 @@ from pathlib import Path
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Global: disable noisy tracing from OpenAI Agents SDK
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(autouse=True, scope="session")
 def _disable_openai_agents_tracing():
@@ -30,6 +30,7 @@ def _disable_openai_agents_tracing():
 # ---------------------------------------------------------------------------
 # Integration test environment
 # ---------------------------------------------------------------------------
+
 
 def _load_env():
     """Load tests/.env if present (plain KEY=VALUE, no shell expansion)."""
@@ -65,10 +66,7 @@ def _env(var: str) -> str:
 
 def _integration_configured() -> bool:
     """Return True if all required env vars are set to non-placeholder values."""
-    return all(
-        _env(v) and "example" not in _env(v).lower()
-        for v in _REQUIRED_VARS
-    )
+    return all(_env(v) and "example" not in _env(v).lower() for v in _REQUIRED_VARS)
 
 
 # Marker: skip integration tests when env is not configured

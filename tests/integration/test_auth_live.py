@@ -14,10 +14,7 @@ from __future__ import annotations
 import httpx
 from openai import AsyncOpenAI, OpenAI
 
-from oci_genai_auth import (
-    OciSessionAuth,
-    OciUserPrincipalAuth,
-)
+from oci_genai_auth import OciSessionAuth, OciUserPrincipalAuth
 from tests.conftest import requires_oci
 
 _ENDPOINT = "https://inference.generativeai.{region}.oci.oraclecloud.com/openai/v1"
@@ -35,7 +32,12 @@ class TestOciAuthSigningLive:
     """Verify that OCI request signing produces valid, accepted requests."""
 
     def test_sync_responses_api(
-        self, oci_project_id, oci_region, oci_profile, oci_auth_type, oci_model,
+        self,
+        oci_project_id,
+        oci_region,
+        oci_profile,
+        oci_auth_type,
+        oci_model,
     ):
         """Sign a sync request and verify the Responses API accepts it."""
         auth = _build_auth(oci_profile, oci_auth_type)
@@ -53,7 +55,12 @@ class TestOciAuthSigningLive:
         assert "AUTH_SYNC_OK" in resp.output_text
 
     def test_async_responses_api(
-        self, oci_project_id, oci_region, oci_profile, oci_auth_type, oci_model,
+        self,
+        oci_project_id,
+        oci_region,
+        oci_profile,
+        oci_auth_type,
+        oci_model,
     ):
         """Sign an async request and verify the Responses API accepts it."""
         import asyncio
@@ -78,7 +85,12 @@ class TestOciAuthSigningLive:
         assert "AUTH_ASYNC_OK" in output
 
     def test_raw_httpx_request(
-        self, oci_project_id, oci_region, oci_profile, oci_auth_type, oci_model,
+        self,
+        oci_project_id,
+        oci_region,
+        oci_profile,
+        oci_auth_type,
+        oci_model,
     ):
         """Verify signing works at the raw httpx level (no OpenAI SDK)."""
         auth = _build_auth(oci_profile, oci_auth_type)
@@ -107,7 +119,11 @@ class TestOciAuthSigningLive:
         assert "RAW_HTTPX_OK" in output_text
 
     def test_auth_headers_stripped(
-        self, oci_project_id, oci_region, oci_profile, oci_auth_type,
+        self,
+        oci_project_id,
+        oci_region,
+        oci_profile,
+        oci_auth_type,
     ):
         """Verify that sdk-injected Authorization/X-Api-Key headers are
         replaced by OCI signing headers, not sent alongside them."""

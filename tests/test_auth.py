@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import contextlib
 from unittest.mock import patch
 
 import httpx
+import pytest
 
 from oci_genai_auth.auth import (
     HttpxOciAuth,
@@ -117,10 +119,8 @@ def test_auth_flow_no_retry_on_200():
     flow = auth.auth_flow(request)
     signed_request = next(flow)
     response = httpx.Response(200, request=signed_request)
-    try:
+    with contextlib.suppress(StopIteration):
         flow.send(response)
-    except StopIteration:
-        pass
     assert auth.refresh_calls == 0
 
 
@@ -134,11 +134,8 @@ def test_auth_flow_401_refresh_failure_does_not_crash(caplog):
         flow = auth.auth_flow(request)
         signed_request = next(flow)
         response = httpx.Response(401, request=signed_request)
-        try:
+        with pytest.raises(StopIteration):
             flow.send(response)
-            assert False, "Expected StopIteration, got a retry request"
-        except StopIteration:
-            pass
 
     assert auth._last_refresh_error is not None
     assert any("Token refresh on 401 failed" in r.message for r in caplog.records)
@@ -256,11 +253,8 @@ def test_session_auth_missing_key_file():
         patch("builtins.open", create=True) as mock_open,
     ):
         mock_open.return_value.__enter__.return_value.read.return_value = "dummy_token"
-        try:
+        with pytest.raises(KeyError, match="key_file"):
             OciSessionAuth(profile_name="DEFAULT")
-            assert False, "Expected KeyError"
-        except KeyError as e:
-            assert "key_file" in str(e)
 
 
 def test_session_auth_refresh_reloads_config():
