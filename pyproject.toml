@@ -80,6 +80,11 @@ omit = [
     "src/oci_genai_auth/__about__.py",
 ]
 
+[tool.pytest.ini_options]
+markers = [
+    "integration: live OCI endpoint tests (require OCI_GENAI_* env vars)",
+]
+
 [tool.coverage.paths]
 oci_genai_auth = ["src/oci_genai_auth", "*/oci-genai-auth/src/oci_genai_auth"]
 tests = ["tests", "*/oci-genai-auth/tests"]

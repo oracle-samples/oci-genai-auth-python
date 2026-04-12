@@ -20,6 +20,18 @@ logger = logging.getLogger(__name__)
 OciAuthSigner: TypeAlias = oci.signer.AbstractBaseSigner
 
 
+class OciAuthRefreshError(Exception):
+    """Raised when a scheduled or on-demand signer refresh fails."""
+
+    def __init__(self, cause: Exception, last_success: Optional[float] = None):
+        self.cause = cause
+        self.last_success = last_success
+        elapsed = ""
+        if last_success is not None:
+            elapsed = f" (last successful refresh {time.time() - last_success:.0f}s ago)"
+        super().__init__(f"OCI signer refresh failed{elapsed}: {cause}")
+
+
 class HttpxOciAuth(httpx.Auth, ABC):
     """
     Enhanced custom HTTPX authentication class that implements OCI request signing
@@ -33,6 +45,7 @@ class HttpxOciAuth(httpx.Auth, ABC):
         refresh_interval: Seconds between token refreshes (default: 3600 - 1 hour)
         _lock: Threading lock for thread-safe token refresh
         _last_refresh: Last refresh timestamp
+        _last_refresh_error: The last refresh exception, if any (None on success)
     """
 
     def __init__(self, signer: OciAuthSigner, refresh_interval: int = 3600):
@@ -46,7 +59,8 @@ class HttpxOciAuth(httpx.Auth, ABC):
         self.refresh_interval = refresh_interval
         self._lock = threading.Lock()
         self._last_refresh: Optional[float] = time.time()
-        logger.info(
+        self._last_refresh_error: Optional[Exception] = None
+        logger.debug(
             "Initialized %s with refresh interval: %d seconds",
             self.__class__.__name__,
             refresh_interval,
@@ -76,13 +90,20 @@ class HttpxOciAuth(httpx.Auth, ABC):
         """
         with self._lock:
             if self._should_refresh_token():
-                logger.info("Time interval reached, refreshing %s ...", self.__class__.__name__)
+                logger.debug("Time interval reached, refreshing %s ...", self.__class__.__name__)
                 try:
                     self._refresh_signer()
                     self._last_refresh = time.time()
+                    self._last_refresh_error = None
                     logger.info("%s token refresh completed successfully", self.__class__.__name__)
-                except Exception:
-                    logger.exception("Token refresh failed")
+                except Exception as exc:
+                    self._last_refresh_error = exc
+                    logger.warning(
+                        "Scheduled token refresh failed for %s, "
+                        "continuing with existing signer: %s",
+                        self.__class__.__name__,
+                        exc,
+                    )
             return self.signer
 
     def _sign_request(self, request: httpx.Request, content: bytes, signer: OciAuthSigner) -> None:
@@ -112,6 +133,8 @@ class HttpxOciAuth(httpx.Auth, ABC):
         2. Signs the request using OCI signer
         3. Yields the signed request
         4. If 401 error is received, attempts token refresh and retries once
+        5. If retry refresh also fails, the generator ends and the caller
+           receives the original 401 rather than a silently dropped response
         Args:
             request: The HTTPX request to be authenticated
         Yields:
@@ -138,11 +161,18 @@ class HttpxOciAuth(httpx.Auth, ABC):
                 try:
                     self._refresh_signer()
                     self._last_refresh = time.time()
+                    self._last_refresh_error = None
                     signer = self.signer
                     self._sign_request(request, content, signer)
                     yield request
-                except Exception:
-                    logger.exception("Token refresh on 401 failed")
+                except Exception as exc:
+                    self._last_refresh_error = exc
+                    logger.error(
+                        "Token refresh on 401 failed for %s: %s. "
+                        "The original 401 response will be returned to the caller.",
+                        self.__class__.__name__,
+                        exc,
+                    )
 
 
 class OciSessionAuth(HttpxOciAuth):
@@ -231,13 +261,13 @@ class OciSessionAuth(HttpxOciAuth):
         with open(token_file, "r") as f:
             return f.read().strip()
 
-    def _load_private_key(self, config: Any) -> str:
+    def _load_private_key(self, config: Any) -> Any:
         """
         Load private key from file specified in configuration.
         Args:
             config: OCI configuration dictionary
         Returns:
-            Private key object
+            Private key object (RSA/EC key from cryptography library)
         """
         return oci.signer.load_private_key_from_file(config["key_file"])
 
