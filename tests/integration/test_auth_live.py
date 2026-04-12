@@ -7,6 +7,14 @@ These tests make real API calls to the OCI Enterprise AI Agents endpoint
 to verify that request signing works end-to-end.  They are skipped
 automatically when ``OCI_GENAI_*`` environment variables are not set
 (see ``tests/.env.example``).
+
+The assertions verify that:
+  - The request was accepted (not 401/403/404)
+  - A non-empty response was returned
+  - OCI signing headers replaced SDK-injected headers
+
+They intentionally do NOT assert on response content (model output is
+non-deterministic). The goal is to verify auth, not model behavior.
 """
 
 from __future__ import annotations
@@ -49,10 +57,10 @@ class TestOciAuthSigningLive:
         )
         resp = client.responses.create(
             model=oci_model,
-            input="Reply with exactly: AUTH_SYNC_OK",
+            input="What is 2+2?",
             store=False,
         )
-        assert "AUTH_SYNC_OK" in resp.output_text
+        assert resp.output_text, "Expected non-empty response from Responses API"
 
     def test_async_responses_api(
         self,
@@ -76,13 +84,13 @@ class TestOciAuthSigningLive:
             )
             resp = await client.responses.create(
                 model=oci_model,
-                input="Reply with exactly: AUTH_ASYNC_OK",
+                input="What is 2+2?",
                 store=False,
             )
             return resp.output_text
 
         output = asyncio.run(_run())
-        assert "AUTH_ASYNC_OK" in output
+        assert output, "Expected non-empty response from async Responses API"
 
     def test_raw_httpx_request(
         self,
@@ -99,7 +107,7 @@ class TestOciAuthSigningLive:
         url = _ENDPOINT.format(region=oci_region) + "/responses"
         body = {
             "model": oci_model,
-            "input": "Reply with exactly: RAW_HTTPX_OK",
+            "input": "What is 2+2?",
             "store": False,
         }
         headers = {
@@ -108,15 +116,12 @@ class TestOciAuthSigningLive:
         }
         resp = client.post(url, json=body, headers=headers, timeout=60)
 
-        assert resp.status_code == 200
+        assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text[:200]}"
         data = resp.json()
-        output_text = data.get("output_text", "")
-        if not output_text:
-            for item in data.get("output", []):
-                if item.get("type") == "message":
-                    for content in item.get("content", []):
-                        output_text += content.get("text", "")
-        assert "RAW_HTTPX_OK" in output_text
+        # Response must contain output (either output_text or output array)
+        assert data.get("output_text") or data.get(
+            "output"
+        ), "Expected non-empty output in response"
 
     def test_auth_headers_stripped(
         self,
