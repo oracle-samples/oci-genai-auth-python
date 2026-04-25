@@ -11,7 +11,6 @@ import pytest
 
 from oci_genai_auth.auth import (
     HttpxOciAuth,
-    OciAuthRefreshError,
     OciInstancePrincipalAuth,
     OciResourcePrincipalAuth,
     OciSessionAuth,
@@ -184,28 +183,6 @@ def test_refresh_success_clears_error():
     auth._refresh_if_needed()
     assert auth._last_refresh_error is None
     assert auth.refresh_calls == 1
-
-
-# ---------------------------------------------------------------------------
-# OciAuthRefreshError
-# ---------------------------------------------------------------------------
-
-
-def test_refresh_error_includes_elapsed_time():
-    import time
-
-    err = OciAuthRefreshError(
-        cause=ConnectionError("timeout"),
-        last_success=time.time() - 120,
-    )
-    assert "120s ago" in str(err) or "119s ago" in str(err)
-    assert "timeout" in str(err)
-
-
-def test_refresh_error_without_last_success():
-    err = OciAuthRefreshError(cause=ValueError("bad config"))
-    assert "bad config" in str(err)
-    assert "ago" not in str(err)
 
 
 # ---------------------------------------------------------------------------

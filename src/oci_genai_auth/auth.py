@@ -20,18 +20,6 @@ logger = logging.getLogger(__name__)
 OciAuthSigner: TypeAlias = oci.signer.AbstractBaseSigner
 
 
-class OciAuthRefreshError(Exception):
-    """Raised when a scheduled or on-demand signer refresh fails."""
-
-    def __init__(self, cause: Exception, last_success: Optional[float] = None):
-        self.cause = cause
-        self.last_success = last_success
-        elapsed = ""
-        if last_success is not None:
-            elapsed = f" (last successful refresh {time.time() - last_success:.0f}s ago)"
-        super().__init__(f"OCI signer refresh failed{elapsed}: {cause}")
-
-
 class HttpxOciAuth(httpx.Auth, ABC):
     """
     Enhanced custom HTTPX authentication class that implements OCI request signing
