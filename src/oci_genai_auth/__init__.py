@@ -13,8 +13,8 @@ from .auth import (
 
 __all__ = [
     "HttpxOciAuth",
-    "OciSessionAuth",
-    "OciResourcePrincipalAuth",
     "OciInstancePrincipalAuth",
+    "OciResourcePrincipalAuth",
+    "OciSessionAuth",
     "OciUserPrincipalAuth",
 ]
