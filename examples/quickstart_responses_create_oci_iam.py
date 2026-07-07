@@ -11,15 +11,20 @@ Steps:
   3. Run this script
 """
 
-from examples.enterprise_ai_agents import common
+import os
+
+from examples import common
+
+MODEL = os.getenv("OCI_GENAI_RESPONSES_MODEL", "xai.grok-4-1-fast-reasoning")
+PROMPT = "What is 2x2?"
 
 
 def main():
-    client = common.build_enterprise_ai_agents_client()
+    client = common.build_oci_iam_openai_client()
 
     response = client.responses.create(
-        model="xai.grok-4-1-fast-reasoning",
-        input="What is 2x2?",
+        model=MODEL,
+        input=PROMPT,
     )
     print(response.output_text)
 

@@ -14,20 +14,17 @@ Steps:
 
 import os
 
-from openai import OpenAI
+from examples import common
 
-from examples.enterprise_ai_agents.common import PROJECT_OCID
+MODEL = os.getenv("OCI_GENAI_RESPONSES_MODEL", "xai.grok-4-1-fast-reasoning")
+PROMPT = "What is 2x2?"
 
 
 def main():
-    client = OpenAI(
-        api_key=os.getenv("OPENAI_API_KEY"),
-        project=os.getenv("OCI_GENAI_PROJECT_ID", PROJECT_OCID),
-        base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
-    )
+    client = common.build_api_key_openai_client()
     response = client.responses.create(
-        model="xai.grok-4-1-fast-reasoning",
-        input="What is 2x2?",
+        model=MODEL,
+        input=PROMPT,
     )
     print(response.output_text)
 
