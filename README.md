@@ -68,7 +68,7 @@ OCI Enterprise AI Agents provides a unified API for interacting with models and 
 
 In addition to the compatible endpoint to Responses API, OCI Enterprise AI Agents also offers compatible endpoints to Files API, Vector Stores API, and Containers API.
 
-Explore [examples](https://github.com/oracle-samples/oci-genai-auth-python/tree/main/examples/enterprise_ai_agents) to get started.
+Explore [examples](https://github.com/oracle-samples/oci-genai-auth-python/tree/main/examples) to get started.
 
 Note: OpenAI commercial models and image generation are only available to Oracle internal teams at this moment.
 
@@ -86,7 +86,22 @@ client = OpenAI(
 ```
 
 ## Examples
-Demo code and instructions on how to run them can be found in the ```examples``` folder.
+Demo code and instructions on how to run them can be found in the `examples` folder.
+
+Install the example dependency with:
+
+```bash
+pip install -e '.[examples]'
+```
+
+The examples include Responses quickstarts and sync/async Chat Completions quickstarts:
+
+- Responses API with API key auth: `examples/quickstart_responses_create_api_key.py`
+- Responses API with OCI IAM auth: `examples/quickstart_responses_create_oci_iam.py`
+- Chat Completions API with API key auth: `examples/quickstart_chat_completions_create_api_key.py`
+- Chat Completions API with API key auth, async: `examples/quickstart_chat_completions_create_api_key_async.py`
+- Chat Completions API with OCI IAM auth: `examples/quickstart_chat_completions_create_oci_iam.py`
+- Chat Completions API with OCI IAM auth, async: `examples/quickstart_chat_completions_create_oci_iam_async.py`
 
 ## Contributing
 
