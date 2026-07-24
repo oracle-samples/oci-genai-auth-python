@@ -1,4 +1,4 @@
-# OCI Generative AI OpenAI-Compatible Quickstarts
+# OCI Generative AI SDK Quickstarts
 
 This folder contains quickstarts for the supported OpenAI-compatible APIs and auth modes:
 
@@ -6,6 +6,7 @@ This folder contains quickstarts for the supported OpenAI-compatible APIs and au
 - Responses API with OCI IAM auth through `oci-genai-auth`
 - Chat Completions API with OCI Generative AI API Key auth, sync and async
 - Chat Completions API with OCI IAM auth through `oci-genai-auth`, sync and async
+- Google Gen AI SDK with OCI Generative AI API-key and OCI IAM authentication
 
 ## Prerequisites
 
@@ -33,7 +34,8 @@ This folder contains quickstarts for the supported OpenAI-compatible APIs and au
 4. If running API-key based examples, set:
 
    ```bash
-   export OPENAI_API_KEY=<your_oci_genai_api_key>
+   export OPENAI_API_KEY=<your_openai_compatible_oci_genai_api_key>
+   export OCI_GENAI_API_KEY=<your_google_compatible_oci_genai_api_key>
    ```
 
 5. If running OCI IAM Chat Completions examples, set:
@@ -55,6 +57,9 @@ python -m examples.quickstart_chat_completions_create_oci_iam
 python -m examples.quickstart_chat_completions_create_oci_iam_async
 python -m examples.quickstart_chat_completions_create_api_key
 python -m examples.quickstart_chat_completions_create_api_key_async
+python -m examples.google.generate_content_api_key
+python -m examples.google.generate_content_oci_iam
+python -m examples.google.generate_content_oci_iam_async
 ```
 
 ## Notes
@@ -64,3 +69,4 @@ python -m examples.quickstart_chat_completions_create_api_key_async
 - OCI IAM Chat Completions quickstarts pass `COMPARTMENT_ID` as both `CompartmentId` and `opc-compartment-id` headers.
 - Chat Completions defaults to `meta.llama-4-scout-17b-16e-instruct`; override `OCI_GENAI_CHAT_MODEL` if needed.
 - These quickstarts use OCI Generative AI OpenAI-compatible `/openai/v1` endpoints and require a project OCID.
+- Google Gen AI quickstarts use the OCI Generative AI `/google` endpoint. API-key examples use `OCI_GENAI_API_KEY`; OCI IAM examples need a valid OCI CLI session/profile.

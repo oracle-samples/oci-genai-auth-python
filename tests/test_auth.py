@@ -64,14 +64,15 @@ def test_auth_flow_signs_request():
 
 
 def test_sign_request_strips_conflicting_headers():
-    """Verify Authorization and X-Api-Key are removed before OCI signing."""
+    """Verify SDK credentials are removed before OCI signing."""
     auth = _DummyAuth(_DummySigner("oci-sig"))
     request = httpx.Request(
         "POST",
-        "https://example.com/api",
+        "https://example.com/api?key=google-sdk-key&keep=value",
         headers={
             "Authorization": "Bearer sdk-token",
             "X-Api-Key": "sdk-key",
+            "x-goog-api-key": "google-sdk-key",
             "Content-Type": "application/json",
         },
         content=b'{"hello": "world"}',
@@ -79,7 +80,10 @@ def test_sign_request_strips_conflicting_headers():
     auth._sign_request(request, request.content, auth.signer)
     assert request.headers["authorization"] == "oci-sig"
     assert "x-api-key" not in request.headers
+    assert "x-goog-api-key" not in request.headers
     assert request.headers["content-type"] == "application/json"
+    assert request.url.params.get("key") is None
+    assert request.url.params.get("keep") == "value"
 
 
 def test_sign_request_with_body():
