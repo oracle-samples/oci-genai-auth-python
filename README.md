@@ -3,13 +3,14 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/oci-genai-auth.svg)](https://pypi.org/project/oci-genai-auth)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oci-genai-auth.svg)](https://pypi.org/project/oci-genai-auth)
 
-The **OCI GenAI Auth** Python library provides OCI request-signing helpers for the OpenAI-compatible REST APIs hosted by OCI Generative AI.
+The **OCI GenAI Auth** Python library provides OCI request-signing helpers for SDKs that call OCI Generative AI, including the OpenAI and Google Gen AI SDKs.
 
 ## Table of Contents
 
 - [Installation](#installation)
 - [Using OCI IAM Auth](#using-oci-iam-auth)
 - [Using API Key Auth](#using-api-key-auth)
+- [Using the Google Gen AI SDK](#using-the-google-gen-ai-sdk)
 - [Using OCI Enterprise AI Agents APIs](#using-oci-enterprise-ai-agents-apis)
 - [Examples](#examples)
 - [Contributing](#contributing)
@@ -37,6 +38,45 @@ client = OpenAI(
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     api_key="not-used",
     http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
+)
+```
+
+## Using the Google Gen AI SDK
+
+Install the optional Google SDK dependency:
+
+```bash
+pip install 'oci-genai-auth[google]'
+```
+
+With an OCI Generative AI API key:
+
+```python
+import os
+from google import genai
+
+client = genai.Client(
+    api_key=os.environ["OCI_GENAI_API_KEY"],
+    http_options={
+        "base_url": "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/google"
+    },
+)
+```
+
+For OCI IAM authentication, pass an OCI-signing `httpx` client. `HttpxOciAuth`
+removes Google SDK API-key headers and query parameters before signing the request.
+
+```python
+import httpx
+from google import genai
+from oci_genai_auth import OciSessionAuth
+
+client = genai.Client(
+    api_key="not-used",
+    http_options={
+        "base_url": "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/google",
+        "httpx_client": httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
+    },
 )
 ```
 
@@ -102,6 +142,8 @@ The examples include Responses quickstarts and sync/async Chat Completions quick
 - Chat Completions API with API key auth, async: `examples/quickstart_chat_completions_create_api_key_async.py`
 - Chat Completions API with OCI IAM auth: `examples/quickstart_chat_completions_create_oci_iam.py`
 - Chat Completions API with OCI IAM auth, async: `examples/quickstart_chat_completions_create_oci_iam_async.py`
+- Google Gen AI API-key quickstart: `examples/google/generate_content_api_key.py`
+- Google Gen AI OCI IAM quickstart: `examples/google/generate_content_oci_iam.py`
 
 ## Contributing
 

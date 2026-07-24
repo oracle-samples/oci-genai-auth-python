@@ -102,6 +102,14 @@ class HttpxOciAuth(httpx.Auth, ABC):
         # Strip any SDK auth headers to avoid conflicting with OCI signing.
         request.headers.pop("Authorization", None)
         request.headers.pop("X-Api-Key", None)
+        request.headers.pop("x-goog-api-key", None)
+
+        # google-genai sends the API key as the `key` query parameter. OCI IAM
+        # requests must be signed instead, so do not forward that SDK credential.
+        params = list(request.url.params.multi_items())
+        filtered_params = [(key, value) for key, value in params if key.lower() != "key"]
+        if len(filtered_params) != len(params):
+            request.url = request.url.copy_with(params=filtered_params)
         req = requests.Request(
             method=request.method,
             url=str(request.url),
