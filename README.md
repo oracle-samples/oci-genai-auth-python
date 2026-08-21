@@ -12,6 +12,7 @@ The **OCI GenAI Auth** Python library provides OCI request-signing helpers for S
 - [Using API Key Auth](#using-api-key-auth)
 - [Using the Google Gen AI SDK](#using-the-google-gen-ai-sdk)
 - [Using OCI Enterprise AI Agents APIs](#using-oci-enterprise-ai-agents-apis)
+- [Reasoning controls for compatible models](#reasoning-controls-for-compatible-models)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [Security](#security)
@@ -124,6 +125,12 @@ client = OpenAI(
     http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
 )
 ```
+
+## Reasoning controls for compatible models
+
+Some models expose reasoning or thinking mode through their chat template. See
+[the reasoning controls guide](docs/reasoning-controls.md) for OpenAI SDK examples
+that enable, disable, or use the model default for `enable_thinking`.
 
 ## Examples
 Demo code and instructions on how to run them can be found in the `examples` folder.
